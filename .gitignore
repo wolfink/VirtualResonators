@@ -6,5 +6,5 @@
 ## Ignore everything but the source code
 Builds/
 JuceLibraryCode/
-.filtergraph
 .vs/
+*.filtergraph
