@@ -10,9 +10,10 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-ResonatorProjectAudioProcessor::ResonatorProjectAudioProcessor()
+ResonatorProjectAudioProcessor::ResonatorProjectAudioProcessor() :
+synths(std::vector<StringModel<float>>(NUM_RESONATORS, StringModel<float>(44100)))
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
+     , AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  juce::AudioChannelSet::mono(), true)
@@ -93,9 +94,11 @@ void ResonatorProjectAudioProcessor::changeProgramName (int index, const juce::S
 //==============================================================================
 void ResonatorProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    synth.setFrequency(440.0);
-    synth.prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32) samplesPerBlock, 1 }));
-    resonatorFrequency = 440.0;
+    for (int i = 0; i < NUM_RESONATORS; i++) {
+		synths[i].setFrequency(440.0);
+		synths[i].prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32) samplesPerBlock, 1 }));
+		resonatorFrequency[i] = 440.0;
+    }
     noise = false;
 }
 
@@ -158,10 +161,18 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         if (noise) {
             juce::Random random;
             random.setSeedRandomly();
-            for (int i = 0; i < (int)(getSampleRate() / resonatorFrequency); i++) channelData[i] = random.nextFloat();
+            for (int i = 0; i < (int)(getSampleRate() / resonatorFrequency[0]); i++) channelData[i] = random.nextFloat();
 			noise = false;
         }
-        synth.process(channelData, channel, buffer.getNumSamples());
+
+        float *channelDataCopy = new float[buffer.getNumSamples()];
+        float* proccessedChannelData = new float[buffer.getNumSamples()]{ 0 };
+        for (int i = 0; i < NUM_RESONATORS; i++) {
+            for (int j = 0; j < buffer.getNumSamples(); j++) channelDataCopy[j] = channelData[j];
+			synths[i].process(channelDataCopy, channel, buffer.getNumSamples());
+            for (int j = 0; j < buffer.getNumSamples(); j++) proccessedChannelData[j] += channelDataCopy[j] / NUM_RESONATORS;
+        }
+		for (int j = 0; j < buffer.getNumSamples(); j++) channelData[j] = proccessedChannelData[j];
     }
 	buffer.applyGain(outputVolume);
 }
@@ -196,4 +207,32 @@ void ResonatorProjectAudioProcessor::setStateInformation (const void* data, int 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new ResonatorProjectAudioProcessor();
+}
+
+//==============================================================================
+void ResonatorProjectAudioProcessor::setOutputVolume(double newInputVolume)
+{
+    outputVolume = newInputVolume;
+}
+
+void ResonatorProjectAudioProcessor::setFrequency(int index, double newFrequency)
+{
+    jassert(index < NUM_RESONATORS);
+    resonatorFrequency[index] = newFrequency;
+    synths[index].setFrequency(newFrequency);
+}
+
+void ResonatorProjectAudioProcessor::setFeedback(double newFeedback)
+{
+    resonatorFeedback = newFeedback;
+}
+
+void ResonatorProjectAudioProcessor::setVolume(double newVolume)
+{
+    volume = newVolume;
+}
+
+void ResonatorProjectAudioProcessor::addNoise()
+{
+    noise = true;
 }

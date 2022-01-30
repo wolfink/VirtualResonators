@@ -15,20 +15,23 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    setSize (600, 400);
 
     // Set parameters for resonator frequency knobs
-    resonatorFrequency.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    resonatorFrequency.setRange(20.0, 10000.0, 0.7);
-    resonatorFrequency.setSkewFactor(.5);
-    resonatorFrequency.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-    resonatorFrequency.setPopupDisplayEnabled(true, false, this);
-    resonatorFrequency.setTextValueSuffix(" Hz");
-    resonatorFrequency.onValueChange = [this] { (&audioProcessor)->setFrequency(resonatorFrequency.getValue()); };
-    resonatorFrequency.setValue(440.0);
-    
-    resonatorFrequencyLabel.setText("Frequency", juce::NotificationType::dontSendNotification);
-    resonatorFrequencyLabel.attachToComponent(&resonatorFrequency, false);
+    for (int i = 0; i < NUM_RESONATORS; i++) {
+		resonatorFrequency[i].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+		resonatorFrequency[i].setRange(20.0, 10000.0, 0.7);
+		resonatorFrequency[i].setSkewFactor(.5);
+		resonatorFrequency[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
+		resonatorFrequency[i].setPopupDisplayEnabled(true, false, this);
+		resonatorFrequency[i].setTextValueSuffix(" Hz");
+		resonatorFrequency[i].onValueChange = [this, i] { (&audioProcessor)->setFrequency(i, resonatorFrequency[i].getValue()); };
+		resonatorFrequency[i].setValue(440.0);
+		
+		resonatorFrequencyLabel[i].setText("Frequency", juce::NotificationType::dontSendNotification);
+		resonatorFrequencyLabel[i].attachToComponent(&resonatorFrequency[i], false);
+		addAndMakeVisible(&resonatorFrequency[i]);
+    }
 
     // Set parameters for resonator feedback knobs
     resonatorFeedback.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
@@ -36,7 +39,6 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
     resonatorFeedback.setSkewFactorFromMidPoint(.9);
     resonatorFeedback.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
     resonatorFeedback.setPopupDisplayEnabled(true, false, this);
-    resonatorFrequency.setTextValueSuffix(" Hz");
     resonatorFeedback.onValueChange = [this] { (&audioProcessor)->setFeedback(resonatorFeedback.getValue()); };
     resonatorFeedback.setValue(0.99);
 
@@ -72,9 +74,8 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
     outputVolumeLabel.setText("Output", juce::NotificationType::dontSendNotification);
     outputVolumeLabel.attachToComponent(&outputVolumeSlider, false);
 
-    addAndMakeVisible(&resonatorFrequency);
-    addAndMakeVisible(&resonatorFeedback);
-    addAndMakeVisible(&volumeSlider);
+    //addAndMakeVisible(&resonatorFeedback);
+    //addAndMakeVisible(&volumeSlider);
     addAndMakeVisible(&outputVolumeSlider);
     addAndMakeVisible(&pulseButton);
 
@@ -99,8 +100,11 @@ void ResonatorProjectAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-    resonatorFrequency.setBounds(50, 50, 100, 100);
-    resonatorFeedback.setBounds(150, 50, 100, 100);
+    int knobWidth = getWidth() / NUM_RESONATORS * 0.8;
+    int knobPadding = knobWidth * 0.25;
+    for (int i = 0; i < NUM_RESONATORS; i++)
+        resonatorFrequency[i].setBounds(knobPadding*(i + 1) + knobWidth*i, 50, knobWidth, knobWidth);
+    //resonatorFeedback.setBounds(150, 50, 100, 100);
     volumeSlider.setBounds(250, 50, 100, 100);
     outputVolumeSlider.setBounds(250, 150, 100, 100);
     pulseButton.setBounds(50, 200, 50, 50);

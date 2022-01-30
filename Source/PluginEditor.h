@@ -30,8 +30,8 @@ private:
     // access the processor object that created it.
     ResonatorProjectAudioProcessor& audioProcessor;
 
-    juce::Slider resonatorFrequency;
-    juce::Label  resonatorFrequencyLabel;
+    juce::Slider resonatorFrequency[NUM_RESONATORS];
+    juce::Label  resonatorFrequencyLabel[NUM_RESONATORS];
     juce::Slider resonatorFeedback;
     juce::Label  resonatorFeedbackLabel;
     juce::ShapeButton pulseButton { juce::String("Pulse"), juce::Colour(128, 128, 128), juce::Colour(150, 150, 150), juce::Colour(90, 90, 90) };

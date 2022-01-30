@@ -13,14 +13,23 @@
 
 //==============================================================================
 template<typename SampleType>
-StringModel<SampleType>::StringModel(const juce::dsp::ProcessSpec& ps) : averagingSample(0.0)
+StringModel<SampleType>::StringModel(double sampleRate) : _sampleRate(sampleRate), averagingSample(0.0)
 {
-    processSpec = ps;
-    delayLine.setMaximumDelayInSamples(processSpec.sampleRate / 20.0);
+    delayLine.setMaximumDelayInSamples(_sampleRate / 20.0);
 }
 
-template StringModel<float>::StringModel(const juce::dsp::ProcessSpec& processSpec);
-template StringModel<double>::StringModel(const juce::dsp::ProcessSpec& processSpec);
+template StringModel<float>::StringModel(double sampleRate);
+template StringModel<double>::StringModel(double sampleRate);
+
+template<typename SampleType>
+StringModel<SampleType>::StringModel(const StringModel<SampleType>& stringModel):
+_sampleRate(stringModel._sampleRate), averagingSample(stringModel.averagingSample)
+{
+    delayLine.setMaximumDelayInSamples(_sampleRate / 20.0);
+}
+
+template StringModel<float>::StringModel(const StringModel<float>& stringModel);
+template StringModel<double>::StringModel(const StringModel<double>& stringModel);
 
 template<typename SampleType>
 StringModel<SampleType>::~StringModel()
@@ -33,20 +42,20 @@ template StringModel<double>::~StringModel();
 template<typename SampleType>
 void StringModel<SampleType>::setFrequency(double frequency)
 {
-    delayLine.setDelay(processSpec.sampleRate / frequency);
+    delayLine.setDelay(_sampleRate / frequency);
 }
 
 template void StringModel<float>::setFrequency(double frequency);
 template void StringModel<double>::setFrequency(double frequency);
 
 template<typename SampleType>
-void StringModel<SampleType>::prepare(const juce::dsp::ProcessSpec& ps)
+void StringModel<SampleType>::prepare(const juce::dsp::ProcessSpec& processSpec)
 {
-    double frequency = processSpec.sampleRate / delayLine.getDelay();
-    delayLine.setMaximumDelayInSamples(ps.sampleRate / 20.0);
-    delayLine.setDelay(ps.sampleRate / frequency);
-    delayLine.prepare(ps);
-    processSpec = ps;
+    double frequency = _sampleRate / delayLine.getDelay();
+    delayLine.setMaximumDelayInSamples(processSpec.sampleRate / 20.0);
+    delayLine.setDelay(processSpec.sampleRate / frequency);
+    delayLine.prepare(processSpec);
+    _sampleRate = processSpec.sampleRate;
 }
 
 template void StringModel<float>::prepare(const juce::dsp::ProcessSpec& ps);

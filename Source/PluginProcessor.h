@@ -11,6 +11,8 @@
 #include <JuceHeader.h>
 #include "StringModel.h"
 
+#define NUM_RESONATORS 8
+
 //==============================================================================
 /**
 */
@@ -56,22 +58,20 @@ public:
 
     //==============================================================================
     //void updateFilter() { resonator->setCoefficients(juce::IIRCoefficients::makeBandPass(sr, resonatorFrequency, resonatorFeedback)); }
-    void setOutputVolume(double newInputVolume) { outputVolume = newInputVolume; }
-    void setFrequency(double newFrequency) { resonatorFrequency = newFrequency;  synth.setFrequency(newFrequency); };
-    void setFeedback(double newFeedback) { resonatorFeedback = newFeedback; };
-    void setVolume(double newVolume) { volume = newVolume; }
-    void addNoise() { noise = true; }
+    void setOutputVolume(double newInputVolume);
+    void setFrequency(int index, double newFrequency);
+    void setFeedback(double newFeedback);
+    void setVolume(double newVolume);
+    void addNoise();
     
 private:
     //==============================================================================
-    StringModel<float> synth { juce::dsp::ProcessSpec({ 44100, 0, 1 }) };
+    std::vector<StringModel<float>> synths;
     float volume;
     float outputVolume;
-    double resonatorFrequency;
+    double resonatorFrequency[NUM_RESONATORS];
     double resonatorFeedback;
     bool noise;
-    //float delay1;
-    //float feedback1;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessor)
 };

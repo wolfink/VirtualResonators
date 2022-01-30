@@ -22,7 +22,9 @@ template <typename SampleType>
 class StringModel
 {
 public:
-    StringModel(const juce::dsp::ProcessSpec& processSpec);
+    StringModel(double sampleRate);
+    StringModel(const StringModel<SampleType>& stringModel);
+    //StringModel(const juce::dsp::ProcessSpec& processSpec);
     ~StringModel();
 
     void setFrequency(double frequency);
@@ -30,8 +32,9 @@ public:
     void process(SampleType* samples, int channel, size_t numberOfSamples);
 private:
     juce::dsp::DelayLine<SampleType> delayLine;
-    juce::dsp::ProcessSpec processSpec;
+    //juce::dsp::ProcessSpec processSpec;
+    double _sampleRate;
     //double frequency;
     SampleType averagingSample;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StringModel)
+    JUCE_LEAK_DETECTOR (StringModel)
 };
