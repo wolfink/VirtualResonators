@@ -30,15 +30,17 @@ private:
     // access the processor object that created it.
     ResonatorProjectAudioProcessor& audioProcessor;
 
-    juce::Slider resonatorFrequency[NUM_RESONATORS];
-    juce::Label  resonatorFrequencyLabel[NUM_RESONATORS];
-    juce::Slider resonatorFeedback;
-    juce::Label  resonatorFeedbackLabel;
-    juce::ShapeButton pulseButton { juce::String("Pulse"), juce::Colour(128, 128, 128), juce::Colour(150, 150, 150), juce::Colour(90, 90, 90) };
-    juce::Slider volumeSlider;
-    juce::Label  volumeSliderLabel;
+    juce::Slider  resonatorFrequency[NUM_RESONATORS];
+    juce::Slider  resonatorFeedback[NUM_RESONATORS];
+    juce::Slider  volumeSlider[NUM_RESONATORS];
+    juce::ShapeButton* pulseButtons[NUM_RESONATORS];
     DecibelSlider outputVolumeSlider;
-    juce::Label outputVolumeLabel;
+
+    juce::Label   resonatorNumberLabel[NUM_RESONATORS];
+    juce::Label   resonatorFrequencyLabel;
+    juce::Label   resonatorFeedbackLabel;
+    juce::Label   volumeSliderLabel;
+    juce::Label   outputVolumeLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessorEditor)
 };
