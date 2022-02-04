@@ -98,8 +98,9 @@ void ResonatorProjectAudioProcessor::prepareToPlay (double sampleRate, int sampl
 		synths[i].setFrequency(440.0);
 		synths[i].prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32) samplesPerBlock, 1 }));
 		resonatorFrequency[i] = 440.0;
+		noise[i] = false;
     }
-    noise = false;
+
 }
 
 void ResonatorProjectAudioProcessor::releaseResources()
@@ -158,19 +159,23 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
-        if (noise) {
-            juce::Random random;
-            random.setSeedRandomly();
-            for (int i = 0; i < (int)(getSampleRate() / resonatorFrequency[0]); i++) channelData[i] = random.nextFloat();
-			noise = false;
+        float *channelDataCopy[NUM_RESONATORS];
+        for (int i = 0; i < NUM_RESONATORS; i++) {
+            channelDataCopy[i] = new float[buffer.getNumSamples()]{ 0 };
+			if (noise[i]) {
+				juce::Random random;
+				random.setSeedRandomly();
+				for (int j = 0; j < (int)(getSampleRate() / resonatorFrequency[i]); j++) channelDataCopy[i][j] = random.nextFloat();
+				noise[i] = false;
+			}
+
         }
 
-        float *channelDataCopy = new float[buffer.getNumSamples()];
         float* proccessedChannelData = new float[buffer.getNumSamples()]{ 0 };
         for (int i = 0; i < NUM_RESONATORS; i++) {
-            for (int j = 0; j < buffer.getNumSamples(); j++) channelDataCopy[j] = channelData[j];
-			synths[i].process(channelDataCopy, channel, buffer.getNumSamples());
-            for (int j = 0; j < buffer.getNumSamples(); j++) proccessedChannelData[j] += channelDataCopy[j] / NUM_RESONATORS;
+            for (int j = 0; j < buffer.getNumSamples(); j++) channelDataCopy[i][j] += channelData[j];
+			synths[i].process(channelDataCopy[i], channel, buffer.getNumSamples());
+            for (int j = 0; j < buffer.getNumSamples(); j++) proccessedChannelData[j] += channelDataCopy[i][j] / NUM_RESONATORS;
         }
 		for (int j = 0; j < buffer.getNumSamples(); j++) channelData[j] = proccessedChannelData[j];
     }
@@ -232,7 +237,7 @@ void ResonatorProjectAudioProcessor::setVolume(double newVolume)
     volume = newVolume;
 }
 
-void ResonatorProjectAudioProcessor::addNoise()
+void ResonatorProjectAudioProcessor::addNoise(int index)
 {
-    noise = true;
+    noise[index] = true;
 }

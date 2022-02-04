@@ -62,7 +62,7 @@ public:
     void setFrequency(int index, double newFrequency);
     void setFeedback(double newFeedback);
     void setVolume(double newVolume);
-    void addNoise();
+    void addNoise(int index);
     
 private:
     //==============================================================================
@@ -71,7 +71,7 @@ private:
     float outputVolume;
     double resonatorFrequency[NUM_RESONATORS];
     double resonatorFeedback;
-    bool noise;
+    bool noise[NUM_RESONATORS];
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessor)
 };

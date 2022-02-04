@@ -50,7 +50,7 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 				juce::Colour(90, 90, 90)
 		);
 		pulseButtons[i]->setShape(path, false, false, false);
-		pulseButtons[i]->onClick = [this] { audioProcessor.addNoise(); };
+		pulseButtons[i]->onClick = [this, i] { audioProcessor.addNoise(i); };
 
 		// Set parameters for volume knob
 		volumeSlider[i].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
