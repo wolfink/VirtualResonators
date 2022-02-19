@@ -18,6 +18,51 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 	juce::Path path;
 	path.addRectangle(50, 200, 50, 50);
 
+#if(_DEBUG)
+	bufferView = new juce::ShapeButton(
+				juce::String("Pulse"), 
+				juce::Colour(128, 0, 0), 
+				juce::Colour(150, 0, 0), 
+				juce::Colour(90, 0, 0)
+		);
+	componentView = new juce::ShapeButton(
+				juce::String("Pulse"), 
+				juce::Colour(0, 128, 0), 
+				juce::Colour(0, 150, 0), 
+				juce::Colour(0, 90, 0)
+		);
+	valueTreeView = new juce::ShapeButton(
+				juce::String("Pulse"), 
+				juce::Colour(0, 0, 128), 
+				juce::Colour(0, 0, 150), 
+				juce::Colour(0, 0, 90)
+		);
+	fontAndColourView = new juce::ShapeButton(
+				juce::String("Pulse"), 
+				juce::Colour(128, 0, 128), 
+				juce::Colour(150, 0, 150), 
+				juce::Colour(90, 0, 90)
+		);
+
+	bufferView->setShape(path, false, false, false);
+	bufferView->onClick = [this] { audioProcessor.toggleBufferDebugger(); };
+	addAndMakeVisible(bufferView);
+
+	componentView->setShape(path, false, false, false);
+	componentView->onClick = [this] { toggleComponentDebugger(); };
+	addAndMakeVisible(componentView);
+	componentDebuggerOn = false;
+
+	valueTreeView->setShape(path, false, false, false);
+	valueTreeView->onClick = [this] { openValueTreeDebugger(); };
+	addAndMakeVisible(valueTreeView);
+
+	fontAndColourView->setShape(path, false, false, false);
+	fontAndColourView->onClick = [this] { toggleFontAndColourDesigner(); };
+	addAndMakeVisible(fontAndColourView);
+	fontAndColourDesignerOn = false;
+#endif
+
     // Resonator controls
     for (int i = 0; i < NUM_RESONATORS; i++) {
 		// Set parameters for resonator frequency knobs
@@ -34,13 +79,13 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		resonatorNumberLabel[i].attachToComponent(&resonatorFrequency[i], false);
 
 		// Set parameters for resonator feedback knobs
-		resonatorFeedback[i].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-		resonatorFeedback[i].setRange(0., 1., 0.01);
-		resonatorFeedback[i].setSkewFactorFromMidPoint(.9);
-		resonatorFeedback[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-		resonatorFeedback[i].setPopupDisplayEnabled(true, false, this);
-		resonatorFeedback[i].onValueChange = [this, i] { (&audioProcessor)->setFeedback(resonatorFeedback[i].getValue()); };
-		resonatorFeedback[i].setValue(0.99);
+		resonatorDecay[i].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+		resonatorDecay[i].setRange(0., 1., 0.01);
+		//resonatorFeedback[i].setSkewFactorFromMidPoint(.9);
+		resonatorDecay[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
+		resonatorDecay[i].setPopupDisplayEnabled(true, false, this);
+		resonatorDecay[i].onValueChange = [this, i] { (&audioProcessor)->setDecay(i, resonatorDecay[i].getValue() / 2.0); };
+		resonatorDecay[i].setValue(0.5);
 
 		// Set parameters for pulse button
 		pulseButtons[i] = new juce::ShapeButton(
@@ -61,7 +106,7 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		volumeSlider[i].setValue(10.0);
 
 		addAndMakeVisible(&resonatorFrequency[i]);
-		addAndMakeVisible(&resonatorFeedback[i]);
+		addAndMakeVisible(&resonatorDecay[i]);
 		addAndMakeVisible(&volumeSlider[i]);
 		addAndMakeVisible(pulseButtons[i]);
     }
@@ -83,15 +128,20 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 	resonatorFrequencyLabel.setText("Frequency", juce::NotificationType::dontSendNotification);
 	resonatorFrequencyLabel.attachToComponent(&resonatorFrequency[0], true);
 
-    resonatorFeedbackLabel.setText("Feedback", juce::NotificationType::dontSendNotification);
-    resonatorFeedbackLabel.attachToComponent(&resonatorFeedback[0], true);
+    resonatorDecayLabel.setText("Decay", juce::NotificationType::dontSendNotification);
+    resonatorDecayLabel.attachToComponent(&resonatorDecay[0], true);
     
 	volumeSliderLabel.setText("Volume", juce::NotificationType::dontSendNotification);
 	volumeSliderLabel.attachToComponent(&volumeSlider[0], true);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
+#if(_DEBUG)
+	setSize(850, 600);
+#endif
+#if(_RELEASE)
     setSize (800, 600);
+#endif
 }
 
 ResonatorProjectAudioProcessorEditor::~ResonatorProjectAudioProcessorEditor()
@@ -114,13 +164,46 @@ void ResonatorProjectAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
+#if(_DEBUG)
+	bufferView->setBounds(800, 0, 50, 50);
+	componentView->setBounds(800, 50, 50, 50);
+	valueTreeView->setBounds(800, 100, 50, 50);
+	fontAndColourView->setBounds(800, 150, 50, 50);
+    int knobWidth = (getWidth()-150) / NUM_RESONATORS * 0.8;
+    int knobPadding = knobWidth * 0.25;
+#endif
+#if(_RELEASE)
     int knobWidth = (getWidth()-100) / NUM_RESONATORS * 0.8;
     int knobPadding = knobWidth * 0.25;
+#endif
 	for (int i = 0; i < NUM_RESONATORS; i++) {
         resonatorFrequency[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50, knobWidth, knobWidth);
-		resonatorFeedback[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50 + knobWidth + knobPadding, knobWidth, knobWidth);
+		resonatorDecay[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50 + knobWidth + knobPadding, knobWidth, knobWidth);
 		volumeSlider[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50 + 2*(knobWidth + knobPadding), knobWidth, knobWidth);
 		pulseButtons[i]->setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50 + 3*(knobWidth + knobPadding), knobWidth, knobWidth);
 	}
     outputVolumeSlider.setBounds(650, 450, 100, 100);
 }
+
+#if(_DEBUG)
+void ResonatorProjectAudioProcessorEditor::toggleComponentDebugger()
+{
+    if (!componentDebuggerOn) componentDebugger = new jcf::ComponentDebugger(this);
+    else delete componentDebugger;
+    componentDebuggerOn = !componentDebuggerOn;
+}
+
+void ResonatorProjectAudioProcessorEditor::openValueTreeDebugger()
+{
+    valueTreeDebugger = new jcf::ValueTreeDebugger();
+}
+
+void ResonatorProjectAudioProcessorEditor::toggleFontAndColourDesigner()
+{
+	/*
+    if (!fontAndColourDesignerOn) fontAndColourDesigner = new jcf::FontAndColourDesigner();
+    else delete fontAndColourDesigner;
+    fontAndColourDesignerOn = !fontAndColourDesignerOn;
+	*/
+}
+#endif

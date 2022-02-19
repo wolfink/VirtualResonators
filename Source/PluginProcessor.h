@@ -58,20 +58,31 @@ public:
 
     //==============================================================================
     //void updateFilter() { resonator->setCoefficients(juce::IIRCoefficients::makeBandPass(sr, resonatorFrequency, resonatorFeedback)); }
+#if(_DEBUG)
+    void toggleBufferDebugger();
+#endif
     void setOutputVolume(double newInputVolume);
     void setFrequency(int index, double newFrequency);
-    void setFeedback(double newFeedback);
+    void setDecay(int index, double newTension);
     void setVolume(double newVolume);
     void addNoise(int index);
     
 private:
     //==============================================================================
+#if(_DEBUG)
+    jcf::BufferDebugger* bufferDebugger;
+    bool bufferDebuggerOn;
+#endif
     std::vector<StringModel<float>> synths;
     float volume;
     float outputVolume;
     double resonatorFrequency[NUM_RESONATORS];
-    double resonatorFeedback;
+    //double resonatorTension;
     bool noise[NUM_RESONATORS];
+
+    //For testing
+    double timeElapsed;
+    bool elapse;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessor)
 };

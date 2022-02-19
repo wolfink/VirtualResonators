@@ -94,6 +94,9 @@ void ResonatorProjectAudioProcessor::changeProgramName (int index, const juce::S
 //==============================================================================
 void ResonatorProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+#if(_DEBUG)
+    bufferDebuggerOn = false;
+#endif
     for (int i = 0; i < NUM_RESONATORS; i++) {
 		synths[i].setFrequency(440.0);
 		synths[i].prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32) samplesPerBlock, 1 }));
@@ -156,29 +159,41 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
+    elapse = false; // For testing TODO: remove
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
         float *channelDataCopy[NUM_RESONATORS];
         for (int i = 0; i < NUM_RESONATORS; i++) {
-            channelDataCopy[i] = new float[buffer.getNumSamples()]{ 0 };
+			channelDataCopy[i] = new float[buffer.getNumSamples()]{ 0 };
 			if (noise[i]) {
 				juce::Random random;
 				random.setSeedRandomly();
 				for (int j = 0; j < (int)(getSampleRate() / resonatorFrequency[i]); j++) channelDataCopy[i][j] = random.nextFloat();
 				noise[i] = false;
+                // For testing TODO: remove
+                elapse = true;
+                timeElapsed = 0;
 			}
-
         }
 
+        float gamma = 0.2; // TODO: make a parameter
         float* proccessedChannelData = new float[buffer.getNumSamples()]{ 0 };
+		bufferDebugger->capture("Pre FX", channelData, buffer.getNumSamples(), -1.0, 1.0);
         for (int i = 0; i < NUM_RESONATORS; i++) {
             for (int j = 0; j < buffer.getNumSamples(); j++) channelDataCopy[i][j] += channelData[j];
 			synths[i].process(channelDataCopy[i], channel, buffer.getNumSamples());
-            for (int j = 0; j < buffer.getNumSamples(); j++) proccessedChannelData[j] += channelDataCopy[i][j] / NUM_RESONATORS;
+            for (int j = 0; j < buffer.getNumSamples(); j++) proccessedChannelData[j] += gamma * channelDataCopy[i][j];
+			bufferDebugger->capture("Post FX #" + std::to_string(i), proccessedChannelData, buffer.getNumSamples(), -1.0, 1.0);
+            delete channelDataCopy[i];
         }
 		for (int j = 0; j < buffer.getNumSamples(); j++) channelData[j] = proccessedChannelData[j];
+        bufferDebugger->capture("channelData", channelData, buffer.getNumSamples(), -1.0, 1.0);
     }
+    // For testing TODO: remove
+    if (timeElapsed > 20000.0) elapse = false;
+    else timeElapsed += buffer.getNumSamples() / (this->getSampleRate() / 1000.0);
+
 	buffer.applyGain(outputVolume);
 }
 
@@ -227,9 +242,10 @@ void ResonatorProjectAudioProcessor::setFrequency(int index, double newFrequency
     synths[index].setFrequency(newFrequency);
 }
 
-void ResonatorProjectAudioProcessor::setFeedback(double newFeedback)
+void ResonatorProjectAudioProcessor::setDecay(int index, double newTension)
 {
-    resonatorFeedback = newFeedback;
+    //resonatorTension = newTension;
+    synths[index].setDecay(newTension);
 }
 
 void ResonatorProjectAudioProcessor::setVolume(double newVolume)
@@ -241,3 +257,13 @@ void ResonatorProjectAudioProcessor::addNoise(int index)
 {
     noise[index] = true;
 }
+
+#if(_DEBUG)
+void ResonatorProjectAudioProcessor::toggleBufferDebugger()
+{
+    if (!bufferDebuggerOn) bufferDebugger = new jcf::BufferDebugger();
+    else delete bufferDebugger;
+    bufferDebuggerOn = !bufferDebuggerOn;
+}
+
+#endif

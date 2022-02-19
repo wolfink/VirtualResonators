@@ -30,15 +30,32 @@ private:
     // access the processor object that created it.
     ResonatorProjectAudioProcessor& audioProcessor;
 
+#if(_DEBUG)
+    juce::ShapeButton *bufferView;
+    juce::ShapeButton *componentView;
+    juce::ShapeButton *valueTreeView;
+    juce::ShapeButton *fontAndColourView;
+
+    void toggleComponentDebugger();
+    void openValueTreeDebugger();
+    void toggleFontAndColourDesigner();
+
+    jcf::ComponentDebugger* componentDebugger;
+    jcf::ValueTreeDebugger* valueTreeDebugger;
+    jcf::FontAndColourDesigner* fontAndColourDesigner;
+    bool componentDebuggerOn;
+    bool fontAndColourDesignerOn;
+#endif
+
     juce::Slider  resonatorFrequency[NUM_RESONATORS];
-    juce::Slider  resonatorFeedback[NUM_RESONATORS];
+    juce::Slider  resonatorDecay[NUM_RESONATORS];
     juce::Slider  volumeSlider[NUM_RESONATORS];
     juce::ShapeButton* pulseButtons[NUM_RESONATORS];
     DecibelSlider outputVolumeSlider;
 
     juce::Label   resonatorNumberLabel[NUM_RESONATORS];
     juce::Label   resonatorFrequencyLabel;
-    juce::Label   resonatorFeedbackLabel;
+    juce::Label   resonatorDecayLabel;
     juce::Label   volumeSliderLabel;
     juce::Label   outputVolumeLabel;
 

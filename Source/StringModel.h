@@ -28,13 +28,15 @@ public:
     ~StringModel();
 
     void setFrequency(double frequency);
+    void setDecay(double decay);
     void prepare(const juce::dsp::ProcessSpec& processSpec);
     void process(SampleType* samples, int channel, size_t numberOfSamples);
 private:
-    juce::dsp::DelayLine<SampleType> delayLine;
+    juce::dsp::DelayLine<SampleType> _delayLine;
     //juce::dsp::ProcessSpec processSpec;
     double _sampleRate;
+    double _decay;
     //double frequency;
-    SampleType averagingSample;
+    SampleType _averagingSample;
     JUCE_LEAK_DETECTOR (StringModel)
 };

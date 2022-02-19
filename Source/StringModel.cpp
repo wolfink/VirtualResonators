@@ -13,9 +13,9 @@
 
 //==============================================================================
 template<typename SampleType>
-StringModel<SampleType>::StringModel(double sampleRate) : _sampleRate(sampleRate), averagingSample(0.0)
+StringModel<SampleType>::StringModel(double sampleRate) : _sampleRate(sampleRate), _averagingSample(0.0)
 {
-    delayLine.setMaximumDelayInSamples(_sampleRate / 20.0);
+    _delayLine.setMaximumDelayInSamples(_sampleRate / 20.0);
 }
 
 template StringModel<float>::StringModel(double sampleRate);
@@ -23,9 +23,9 @@ template StringModel<double>::StringModel(double sampleRate);
 
 template<typename SampleType>
 StringModel<SampleType>::StringModel(const StringModel<SampleType>& stringModel):
-_sampleRate(stringModel._sampleRate), averagingSample(stringModel.averagingSample)
+_sampleRate(stringModel._sampleRate), _averagingSample(stringModel._averagingSample)
 {
-    delayLine.setMaximumDelayInSamples(_sampleRate / 20.0);
+    _delayLine.setMaximumDelayInSamples(_sampleRate / 20.0);
 }
 
 template StringModel<float>::StringModel(const StringModel<float>& stringModel);
@@ -42,19 +42,28 @@ template StringModel<double>::~StringModel();
 template<typename SampleType>
 void StringModel<SampleType>::setFrequency(double frequency)
 {
-    delayLine.setDelay(_sampleRate / frequency);
+    _delayLine.setDelay(_sampleRate / frequency);
 }
 
 template void StringModel<float>::setFrequency(double frequency);
 template void StringModel<double>::setFrequency(double frequency);
 
 template<typename SampleType>
+void StringModel<SampleType>::setDecay(double decay)
+{
+    _decay = decay;
+}
+
+template void StringModel<float>::setDecay(double frequency);
+template void StringModel<double>::setDecay(double frequency);
+
+template<typename SampleType>
 void StringModel<SampleType>::prepare(const juce::dsp::ProcessSpec& processSpec)
 {
-    double frequency = _sampleRate / delayLine.getDelay();
-    delayLine.setMaximumDelayInSamples(processSpec.sampleRate / 20.0);
-    delayLine.setDelay(processSpec.sampleRate / frequency);
-    delayLine.prepare(processSpec);
+    double frequency = _sampleRate / _delayLine.getDelay();
+    _delayLine.setMaximumDelayInSamples(processSpec.sampleRate / 20.0);
+    _delayLine.setDelay(processSpec.sampleRate / frequency);
+    _delayLine.prepare(processSpec);
     _sampleRate = processSpec.sampleRate;
 }
 
@@ -67,10 +76,10 @@ void StringModel<SampleType>::process(SampleType* samples, int channel, size_t n
 {
     for (int i = 0; i < numberOfSamples; i++)
     {
-        SampleType delayedSample = delayLine.popSample(0);
-        samples[i] = samples[i] + (averagingSample + delayedSample) / 2;
-        averagingSample = delayedSample;
-        delayLine.pushSample(channel, samples[i]);
+        SampleType delayedSample = _delayLine.popSample(0);
+        samples[i] += 0.99999 * (_decay * _averagingSample + (1 - _decay) * delayedSample);
+        _averagingSample = delayedSample;
+        _delayLine.pushSample(channel, samples[i]);
     }
 }
 
