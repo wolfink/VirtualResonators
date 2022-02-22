@@ -168,7 +168,7 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 			if (noise[i]) {
 				juce::Random random;
 				random.setSeedRandomly();
-				for (int j = 0; j < (int)(getSampleRate() / resonatorFrequency[i]); j++) channelDataCopy[i][j] = random.nextFloat();
+				for (int j = 0; j < (int)(getSampleRate() / resonatorFrequency[i]); j++) channelDataCopy[i][j] = random.nextFloat() * 2.0 - 1.0;
 				noise[i] = false;
 			}
         }

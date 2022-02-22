@@ -32,7 +32,7 @@ public:
     void prepare(const juce::dsp::ProcessSpec& processSpec);
     void process(SampleType* samples, int channel, size_t numberOfSamples);
 private:
-    juce::dsp::DelayLine<SampleType> _delayLine;
+    juce::dsp::DelayLine<SampleType, juce::dsp::DelayLineInterpolationTypes::Thiran> _delayLine;
     //juce::dsp::ProcessSpec processSpec;
     double _sampleRate;
     double _decay;
