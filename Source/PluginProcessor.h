@@ -79,10 +79,6 @@ private:
     double resonatorFrequency[NUM_RESONATORS];
     //double resonatorTension;
     bool noise[NUM_RESONATORS];
-
-    //For testing
-    double timeElapsed;
-    bool elapse;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessor)
 };

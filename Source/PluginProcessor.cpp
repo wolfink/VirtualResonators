@@ -159,7 +159,6 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    elapse = false; // For testing TODO: remove
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
@@ -171,9 +170,6 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 				random.setSeedRandomly();
 				for (int j = 0; j < (int)(getSampleRate() / resonatorFrequency[i]); j++) channelDataCopy[i][j] = random.nextFloat();
 				noise[i] = false;
-                // For testing TODO: remove
-                elapse = true;
-                timeElapsed = 0;
 			}
         }
 
@@ -190,9 +186,6 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 		for (int j = 0; j < buffer.getNumSamples(); j++) channelData[j] = proccessedChannelData[j];
         bufferDebugger->capture("channelData", channelData, buffer.getNumSamples(), -1.0, 1.0);
     }
-    // For testing TODO: remove
-    if (timeElapsed > 20000.0) elapse = false;
-    else timeElapsed += buffer.getNumSamples() / (this->getSampleRate() / 1000.0);
 
 	buffer.applyGain(outputVolume);
 }
@@ -265,5 +258,4 @@ void ResonatorProjectAudioProcessor::toggleBufferDebugger()
     else delete bufferDebugger;
     bufferDebuggerOn = !bufferDebuggerOn;
 }
-
 #endif
