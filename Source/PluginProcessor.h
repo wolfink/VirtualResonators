@@ -80,6 +80,9 @@ private:
     double resonatorFrequency[NUM_RESONATORS];
     //double resonatorTension;
     bool noise[NUM_RESONATORS];
+    // For DC Blocking
+    float _xm1;
+    float _ym1;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessor)
 };

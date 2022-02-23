@@ -98,6 +98,8 @@ void ResonatorProjectAudioProcessor::prepareToPlay (double sampleRate, int sampl
 #if(_DEBUG)
     bufferDebuggerOn = false;
 #endif
+    _xm1 = 0.0;
+    _ym1 = 0.0;
     juce::ValueTree node;
     for (int i = 0; i < NUM_RESONATORS; i++) {
         node = juce::ValueTree("resonator");
@@ -203,7 +205,13 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 #endif
             delete channelDataCopy[i];
         }
-        for (int j = 0; j < buffer.getNumSamples(); j++) channelData[j] = proccessedChannelData[j];
+        // Copy proccessed data into buffer through a DC blocking filter to prevent value drift
+        for (int j = 0; j < buffer.getNumSamples(); j++) {
+            float x = proccessedChannelData[j];
+            float y = x - _xm1 + 0.995 * _ym1;
+            channelData[j] = y;
+            _xm1 = x; _ym1 = y;
+        }
 #if(_DEBUG)
         bufferDebugger->capture("channelData", channelData, buffer.getNumSamples(), -1.0, 1.0);
 #endif
