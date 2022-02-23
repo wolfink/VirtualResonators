@@ -12,6 +12,15 @@
 #include "PluginProcessor.h"
 #include "DecibelSlider.h"
 
+typedef enum Parameters {
+    AddNoise,
+	BufferToggle,
+	DecayTime,
+	Frequency,
+	OutputVolume,
+	ResonatorVolume
+} Parameter;
+
 //==============================================================================
 /**
 */
@@ -29,6 +38,8 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     ResonatorProjectAudioProcessor& audioProcessor;
+
+	void setParameter(Parameter parameter, juce::var& value, int index=0);
 
 #if(_DEBUG)
     juce::ShapeButton *bufferView;

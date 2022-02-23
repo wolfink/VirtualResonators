@@ -11,7 +11,8 @@
 
 //==============================================================================
 ResonatorProjectAudioProcessor::ResonatorProjectAudioProcessor() :
-synths(std::vector<StringModel<float>>(NUM_RESONATORS, StringModel<float>(44100)))
+synths(std::vector<StringModel<float>>(NUM_RESONATORS, StringModel<float>(44100))),
+stateInfo("root")
 #ifndef JucePlugin_PreferredChannelConfigurations
      , AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -97,13 +98,27 @@ void ResonatorProjectAudioProcessor::prepareToPlay (double sampleRate, int sampl
 #if(_DEBUG)
     bufferDebuggerOn = false;
 #endif
+    juce::ValueTree node;
     for (int i = 0; i < NUM_RESONATORS; i++) {
+        node = juce::ValueTree("resonator");
 		synths[i].setFrequency(440.0);
 		synths[i].prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32) samplesPerBlock, 1 }));
 		resonatorFrequency[i] = 440.0;
 		noise[i] = false;
+        node.setProperty("frequency", 440.0, nullptr);
+        node.setProperty("decay time", 1.0, nullptr);
+        node.setProperty("volume", 1.0, nullptr);
+        node.setProperty("add noise", false, nullptr);
+        stateInfo.addChild(node, -1, nullptr);
     }
-
+    stateInfo.addChild(node, -1, nullptr);
+#if (_DEBUG)
+	node = juce::ValueTree("buffer debugger");
+	node.setProperty("on", false, nullptr);
+	stateInfo.addChild(node, -1, nullptr);
+#endif
+    stateInfo.setProperty("gamma", 0.2, nullptr);
+    stateInfo.setProperty("volume", 1.0, nullptr);
 }
 
 void ResonatorProjectAudioProcessor::releaseResources()
@@ -153,41 +168,48 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
+    // Process the audio data
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
         float *channelDataCopy[NUM_RESONATORS];
+        float volume[NUM_RESONATORS];
+
+        // Update synthesizer parameters, and add noise, before processing audio
         for (int i = 0; i < NUM_RESONATORS; i++) {
 			channelDataCopy[i] = new float[buffer.getNumSamples()]{ 0 };
-			if (noise[i]) {
+            synths[i].setFrequency(stateInfo.getChild(i).getProperty("frequency"));
+            synths[i].setDecay(stateInfo.getChild(i).getProperty("decay time"));
+            volume[i] = stateInfo.getChild(i).getProperty("volume");
+			if (stateInfo.getChild(i).getProperty("add noise")) {
 				juce::Random random;
 				random.setSeedRandomly();
 				for (int j = 0; j < (int)(getSampleRate() / resonatorFrequency[i]); j++) channelDataCopy[i][j] = random.nextFloat() * 2.0 - 1.0;
-				noise[i] = false;
+                stateInfo.getChild(i).setProperty("add noise", false, nullptr);
 			}
         }
 
-        float gamma = 0.2; // TODO: make a parameter
+        float gamma = stateInfo.getProperty("gamma");
         float* proccessedChannelData = new float[buffer.getNumSamples()]{ 0 };
+#if(_DEBUG)
 		bufferDebugger->capture("Pre FX", channelData, buffer.getNumSamples(), -1.0, 1.0);
+#endif
         for (int i = 0; i < NUM_RESONATORS; i++) {
-            for (int j = 0; j < buffer.getNumSamples(); j++) channelDataCopy[i][j] += channelData[j];
+            for (int j = 0; j < buffer.getNumSamples(); j++) channelDataCopy[i][j] += channelData[j] / NUM_RESONATORS;
 			synths[i].process(channelDataCopy[i], channel, buffer.getNumSamples());
-            for (int j = 0; j < buffer.getNumSamples(); j++) proccessedChannelData[j] += gamma * channelDataCopy[i][j];
+            for (int j = 0; j < buffer.getNumSamples(); j++) proccessedChannelData[j] += gamma * volume[i] * channelDataCopy[i][j];
+#if(_DEBUG)
 			bufferDebugger->capture("Post FX #" + std::to_string(i), proccessedChannelData, buffer.getNumSamples(), -1.0, 1.0);
+#endif
             delete channelDataCopy[i];
         }
-		for (int j = 0; j < buffer.getNumSamples(); j++) channelData[j] = proccessedChannelData[j];
+        for (int j = 0; j < buffer.getNumSamples(); j++) channelData[j] = proccessedChannelData[j];
+#if(_DEBUG)
         bufferDebugger->capture("channelData", channelData, buffer.getNumSamples(), -1.0, 1.0);
+#endif
     }
 
-	buffer.applyGain(outputVolume);
+	buffer.applyGain(stateInfo.getProperty("volume"));
 }
 
 //==============================================================================
@@ -207,12 +229,15 @@ void ResonatorProjectAudioProcessor::getStateInformation (juce::MemoryBlock& des
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    destData.copyFrom((void *) &stateInfo, 0, sizeof(juce::ValueTree));
 }
 
 void ResonatorProjectAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    jassert(sizeInBytes == sizeof(juce::ValueTree));
+    stateInfo = *(juce::ValueTree*) data;
 }
 
 //==============================================================================

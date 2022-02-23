@@ -72,7 +72,7 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		resonatorFrequency[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
 		resonatorFrequency[i].setPopupDisplayEnabled(true, false, this);
 		resonatorFrequency[i].setTextValueSuffix(" Hz");
-		resonatorFrequency[i].onValueChange = [this, i] { (&audioProcessor)->setFrequency(i, resonatorFrequency[i].getValue()); };
+		resonatorFrequency[i].onValueChange = [this, i] { setParameter(Frequency, juce::var(resonatorFrequency[i].getValue()), i); };
 		resonatorFrequency[i].setValue(440.0);
 		
 		resonatorNumberLabel[i].setText(std::to_string(i+1), juce::NotificationType::dontSendNotification);
@@ -84,7 +84,7 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		//resonatorFeedback[i].setSkewFactorFromMidPoint(.9);
 		resonatorDecay[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
 		resonatorDecay[i].setPopupDisplayEnabled(true, false, this);
-		resonatorDecay[i].onValueChange = [this, i] { (&audioProcessor)->setDecay(i, resonatorDecay[i].getValue() / 2.0); };
+		resonatorDecay[i].onValueChange = [this, i] { setParameter(DecayTime, juce::var(resonatorDecay[i].getValue() / 2.0), i); };
 		resonatorDecay[i].setValue(0.5);
 
 		// Set parameters for pulse button
@@ -95,14 +95,14 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 				juce::Colour(90, 90, 90)
 		);
 		pulseButtons[i]->setShape(path, false, false, false);
-		pulseButtons[i]->onClick = [this, i] { audioProcessor.addNoise(i); };
+		pulseButtons[i]->onClick = [this, i] { setParameter(AddNoise, juce::var(true), i); };
 
 		// Set parameters for volume knob
 		volumeSlider[i].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
 		volumeSlider[i].setRange(0.0, 10.0, 0.01);
 		volumeSlider[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
 		volumeSlider[i].setPopupDisplayEnabled(true, false, this);
-		volumeSlider[i].onValueChange = [this, i] { (&audioProcessor)->setVolume(volumeSlider[i].getValue() / 10.); };
+		volumeSlider[i].onValueChange = [this, i] { setParameter(ResonatorVolume, juce::var(volumeSlider[i].getValue() / 10.0), i); };
 		volumeSlider[i].setValue(10.0);
 
 		addAndMakeVisible(&resonatorFrequency[i]);
@@ -117,7 +117,7 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
     outputVolumeSlider.setSkewFactorFromMidPoint(0.0);
     outputVolumeSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
     outputVolumeSlider.setPopupDisplayEnabled(true, false, this);
-    outputVolumeSlider.onValueChange = [this] { (&audioProcessor)->setOutputVolume(juce::Decibels::decibelsToGain(outputVolumeSlider.getValue())); };
+    outputVolumeSlider.onValueChange = [this] { setParameter(OutputVolume, juce::var(juce::Decibels::decibelsToGain(outputVolumeSlider.getValue()))); };
     outputVolumeSlider.setValue(0.0);
 
     outputVolumeLabel.setText("Output", juce::NotificationType::dontSendNotification);
@@ -185,6 +185,34 @@ void ResonatorProjectAudioProcessorEditor::resized()
     outputVolumeSlider.setBounds(650, 450, 100, 100);
 }
 
+void ResonatorProjectAudioProcessorEditor::setParameter(Parameter parameter, juce::var& value, int index)
+{
+	juce::MemoryBlock memory(sizeof(juce::ValueTree));
+	audioProcessor.getStateInformation(memory);
+	juce::ValueTree* tree = (juce::ValueTree*) memory.getData();
+	switch (parameter) {
+		case Frequency:
+			tree->getChild(index).setProperty("frequency", value, nullptr);
+			break;
+		case DecayTime:
+			tree->getChild(index).setProperty("decay time", value, nullptr);
+			break;
+		case ResonatorVolume:
+			tree->getChild(index).setProperty("volume", value, nullptr);
+			break;
+		case AddNoise:
+			tree->getChild(index).setProperty("add noise", value, nullptr);
+			break;
+		case BufferToggle:
+			tree->getChildWithName("buffer debugger").setProperty("on", value, nullptr);
+			break;
+		case OutputVolume:
+			tree->setProperty("volume", value, nullptr);
+			break;
+	}
+	audioProcessor.setStateInformation((void*) tree, sizeof(juce::ValueTree));
+}
+
 #if(_DEBUG)
 void ResonatorProjectAudioProcessorEditor::toggleComponentDebugger()
 {
@@ -195,7 +223,10 @@ void ResonatorProjectAudioProcessorEditor::toggleComponentDebugger()
 
 void ResonatorProjectAudioProcessorEditor::openValueTreeDebugger()
 {
-    valueTreeDebugger = new jcf::ValueTreeDebugger();
+	juce::MemoryBlock stateInfo(sizeof(juce::ValueTree));
+	audioProcessor.getStateInformation(stateInfo);
+	juce::ValueTree tree = *(juce::ValueTree *) stateInfo.getData();
+    valueTreeDebugger = new jcf::ValueTreeDebugger(tree);
 }
 
 void ResonatorProjectAudioProcessorEditor::toggleFontAndColourDesigner()

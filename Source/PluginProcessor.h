@@ -73,6 +73,7 @@ private:
     jcf::BufferDebugger* bufferDebugger;
     bool bufferDebuggerOn;
 #endif
+    juce::ValueTree stateInfo;
     std::vector<StringModel<float>> synths;
     float volume;
     float outputVolume;
