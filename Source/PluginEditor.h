@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "DecibelSlider.h"
+#include "NoteSlider.h"
 
 typedef enum Parameters {
     AddNoise,
@@ -59,6 +60,10 @@ private:
 #endif
 
     juce::Slider  resonatorFrequency[NUM_RESONATORS];
+    NoteSlider    resonatorNoteValue[NUM_RESONATORS];
+    double resonatorBaseFrequency[NUM_RESONATORS]; // = { 32.70, 36.71, 41.20, 43.65, 49.00, 55.00, 61.74, 32.70 };
+    juce::Slider  resonatorOctave[NUM_RESONATORS];
+    double resonatorMultiplier[NUM_RESONATORS]; // = { 8.0,   8.0,   8.0,   8.0,   8.0,   8.0,   8.0,  16.0 };
     juce::Slider  resonatorDecay[NUM_RESONATORS];
     juce::Slider  volumeSlider[NUM_RESONATORS];
     juce::ShapeButton* pulseButtons[NUM_RESONATORS];
@@ -66,6 +71,8 @@ private:
 
     juce::Label   resonatorNumberLabel[NUM_RESONATORS];
     juce::Label   resonatorFrequencyLabel;
+    juce::Label   resonatorNoteValueLabel;
+    juce::Label   resonatorOctaveLabel;
     juce::Label   resonatorDecayLabel;
     juce::Label   volumeSliderLabel;
     juce::Label   outputVolumeLabel;

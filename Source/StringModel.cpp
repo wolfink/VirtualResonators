@@ -13,7 +13,7 @@
 
 //==============================================================================
 template<typename SampleType>
-StringModel<SampleType>::StringModel(double sampleRate) : _sampleRate(sampleRate), _averagingSample(0.0)
+StringModel<SampleType>::StringModel(double sampleRate) : _sampleRate(sampleRate), _averagingSample(0.0), _damping(0.99999)
 {
     _delayLine.setMaximumDelayInSamples(_sampleRate / 20.0);
 }
@@ -43,6 +43,7 @@ template<typename SampleType>
 void StringModel<SampleType>::setFrequency(double frequency)
 {
     _delayLine.setDelay(_sampleRate / frequency);
+    _damping = std::pow(10, -5 / frequency / STRING_MAX_DUR);
 }
 
 template void StringModel<float>::setFrequency(double frequency);
@@ -77,7 +78,7 @@ void StringModel<SampleType>::process(SampleType* samples, int channel, size_t n
     for (int i = 0; i < numberOfSamples; i++)
     {
         SampleType delayedSample = _delayLine.popSample(0);
-        samples[i] += 0.99999 * (_decay * _averagingSample + (1 - _decay) * delayedSample);
+        samples[i] += _damping * (_decay * _averagingSample + (1 - _decay) * delayedSample);
         _averagingSample = delayedSample;
         _delayLine.pushSample(channel, samples[i]);
     }

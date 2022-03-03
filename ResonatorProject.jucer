@@ -4,6 +4,8 @@
               displaySplashScreen="1" jucerFormatVersion="1" pluginVST3Category="Modulation">
   <MAINGROUP id="LXliL1" name="ResonatorProject">
     <GROUP id="{2E53CB84-5AD1-01EE-CE0A-7E8F6143FC62}" name="Source">
+      <FILE id="V16Kry" name="NoteSlider.cpp" compile="1" resource="0" file="Source/NoteSlider.cpp"/>
+      <FILE id="fu91d5" name="NoteSlider.h" compile="0" resource="0" file="Source/NoteSlider.h"/>
       <FILE id="AHmhM6" name="StringModel.cpp" compile="1" resource="0" file="Source/StringModel.cpp"/>
       <FILE id="ufSstl" name="StringModel.h" compile="0" resource="0" file="Source/StringModel.h"/>
       <FILE id="HOZDJf" name="DecibelSlider.cpp" compile="1" resource="0"

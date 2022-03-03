@@ -12,6 +12,8 @@
 
 #include <JuceHeader.h>
 
+#define STRING_MAX_DUR 20.0
+
 //==============================================================================
 /*
     Physical Modeling of a sympathetic string using Karplus-Strong Algorithm
@@ -36,6 +38,7 @@ private:
     //juce::dsp::ProcessSpec processSpec;
     double _sampleRate;
     double _decay;
+    double _damping;
     //double frequency;
     SampleType _averagingSample;
     JUCE_LEAK_DETECTOR (StringModel)

@@ -9,6 +9,10 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+
+double INITIAL_SCALE[8]    = { 0.0, 2.0, 4.0, 5.0, 7.0, 9.0, 11.0, 0.0 };
+double INITIAL_REGISTER[8] = { 4.0, 4.0, 4.0, 4.0, 4.0, 4.0,  4.0, 5.0 };
+
 //==============================================================================
 ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (ResonatorProjectAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
@@ -16,7 +20,8 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 
     // Useful variables
 	juce::Path path;
-	path.addRectangle(50, 200, 50, 50);
+	path.addEllipse(50, 200, 50, 50);
+	//path.addRectangle(50, 200, 50, 50);
 
 #if(_DEBUG)
 	bufferView = new juce::ShapeButton(
@@ -74,18 +79,37 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		resonatorFrequency[i].setTextValueSuffix(" Hz");
 		resonatorFrequency[i].onValueChange = [this, i] { setParameter(Frequency, juce::var(resonatorFrequency[i].getValue()), i); };
 		resonatorFrequency[i].setValue(440.0);
+
+		resonatorNoteValue[i].setPopupDisplayEnabled(true, false, this);
+		resonatorNoteValue[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
+		resonatorNoteValue[i].onValueChange = [this, i] {
+			resonatorBaseFrequency[i] = 16.35 * pow(pow(2.0, resonatorNoteValue[i].getValue()), 1.0 / 12.0);
+			setParameter(Frequency, juce::var(resonatorBaseFrequency[i] * resonatorMultiplier[i]), i);
+		};
+		resonatorNoteValue[i].setValue(INITIAL_SCALE[i]);
+		resonatorNoteValue[i].onValueChange();
+
+		resonatorOctave[i].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+		resonatorOctave[i].setRange(0.0, 8.0, 1.0);
+		resonatorOctave[i].setPopupDisplayEnabled(true, false, this);
+		resonatorOctave[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
+		resonatorOctave[i].onValueChange = [this, i] {
+			resonatorMultiplier[i] = pow(2.0, resonatorOctave[i].getValue());
+			setParameter(Frequency, juce::var(resonatorBaseFrequency[i] * resonatorMultiplier[i]), i);
+		};
+		resonatorOctave[i].setValue(INITIAL_REGISTER[i]);
+		resonatorOctave[i].onValueChange();
 		
 		resonatorNumberLabel[i].setText(std::to_string(i+1), juce::NotificationType::dontSendNotification);
 		resonatorNumberLabel[i].attachToComponent(&resonatorFrequency[i], false);
 
 		// Set parameters for resonator feedback knobs
 		resonatorDecay[i].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-		resonatorDecay[i].setRange(0., 1., 0.01);
-		//resonatorFeedback[i].setSkewFactorFromMidPoint(.9);
+		resonatorDecay[i].setRange(0., 100., 0.787);
 		resonatorDecay[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
 		resonatorDecay[i].setPopupDisplayEnabled(true, false, this);
-		resonatorDecay[i].onValueChange = [this, i] { setParameter(DecayTime, juce::var(resonatorDecay[i].getValue() / 2.0), i); };
-		resonatorDecay[i].setValue(0.5);
+		resonatorDecay[i].onValueChange = [this, i] { setParameter(DecayTime, juce::var(0.5 - std::pow(resonatorDecay[i].getValue() / 100.0, 2.0) / 2.0), i); };
+		resonatorDecay[i].setValue(50.0);
 
 		// Set parameters for pulse button
 		pulseButtons[i] = new juce::ShapeButton(
@@ -105,7 +129,9 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		volumeSlider[i].onValueChange = [this, i] { setParameter(ResonatorVolume, juce::var(volumeSlider[i].getValue() / 10.0), i); };
 		volumeSlider[i].setValue(10.0);
 
-		addAndMakeVisible(&resonatorFrequency[i]);
+		//addAndMakeVisible(&resonatorFrequency[i]);
+		addAndMakeVisible(&resonatorNoteValue[i]);
+		addAndMakeVisible(&resonatorOctave[i]);
 		addAndMakeVisible(&resonatorDecay[i]);
 		addAndMakeVisible(&volumeSlider[i]);
 		addAndMakeVisible(pulseButtons[i]);
@@ -127,6 +153,12 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
     // Set parameters for labels
 	resonatorFrequencyLabel.setText("Frequency", juce::NotificationType::dontSendNotification);
 	resonatorFrequencyLabel.attachToComponent(&resonatorFrequency[0], true);
+	
+	resonatorNoteValueLabel.setText("Note", juce::NotificationType::dontSendNotification);
+	resonatorNoteValueLabel.attachToComponent(&resonatorNoteValue[0], true);
+
+	resonatorOctaveLabel.setText("Octave", juce::NotificationType::dontSendNotification);
+	resonatorOctaveLabel.attachToComponent(&resonatorOctave[0], true);
 
     resonatorDecayLabel.setText("Decay", juce::NotificationType::dontSendNotification);
     resonatorDecayLabel.attachToComponent(&resonatorDecay[0], true);
@@ -177,12 +209,14 @@ void ResonatorProjectAudioProcessorEditor::resized()
     int knobPadding = knobWidth * 0.25;
 #endif
 	for (int i = 0; i < NUM_RESONATORS; i++) {
-        resonatorFrequency[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50, knobWidth, knobWidth);
-		resonatorDecay[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50 + knobWidth + knobPadding, knobWidth, knobWidth);
-		volumeSlider[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50 + 2*(knobWidth + knobPadding), knobWidth, knobWidth);
-		pulseButtons[i]->setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50 + 3*(knobWidth + knobPadding), knobWidth, knobWidth);
+        //resonatorFrequency[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50, knobWidth, knobWidth);
+		resonatorNoteValue[i].setBounds (100 + knobPadding*(i + 1) + knobWidth*i, 50                              , knobWidth, knobWidth);
+		resonatorOctave[i].setBounds    (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 1*(knobWidth + knobPadding), knobWidth, knobWidth);
+		resonatorDecay[i].setBounds     (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 2*(knobWidth + knobPadding), knobWidth, knobWidth);
+		volumeSlider[i].setBounds       (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 3*(knobWidth + knobPadding), knobWidth, knobWidth);
+		pulseButtons[i]->setBounds      (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 4*(knobWidth + knobPadding), knobWidth, knobWidth);
 	}
-    outputVolumeSlider.setBounds(650, 450, 100, 100);
+    outputVolumeSlider.setBounds(650, 500, 100, 100);
 }
 
 void ResonatorProjectAudioProcessorEditor::setParameter(Parameter parameter, juce::var& value, int index)
