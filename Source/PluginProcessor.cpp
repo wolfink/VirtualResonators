@@ -120,7 +120,9 @@ void ResonatorProjectAudioProcessor::prepareToPlay (double sampleRate, int sampl
 	stateInfo.addChild(node, -1, nullptr);
 #endif
     stateInfo.setProperty("gamma", 0.2, nullptr);
-    stateInfo.setProperty("volume", 1.0, nullptr);
+    stateInfo.setProperty("input", 1.0, nullptr);
+    stateInfo.setProperty("output", 1.0, nullptr);
+    stateInfo.setProperty("wet", 0.5, nullptr);
 }
 
 void ResonatorProjectAudioProcessor::releaseResources()
@@ -177,6 +179,8 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         float *channelDataCopy[NUM_RESONATORS];
         float volume[NUM_RESONATORS];
 
+		buffer.applyGain(stateInfo.getProperty("input"));
+
         // Update synthesizer parameters, and add noise, before processing audio
         for (int i = 0; i < NUM_RESONATORS; i++) {
 			channelDataCopy[i] = new float[buffer.getNumSamples()]{ 0 };
@@ -191,7 +195,9 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 			}
         }
 
+
         float gamma = stateInfo.getProperty("gamma");
+        float wet = stateInfo.getProperty("wet");
         float* proccessedChannelData = new float[buffer.getNumSamples()]{ 0 };
 #if(_DEBUG)
 		bufferDebugger->capture("Pre FX", channelData, buffer.getNumSamples(), -1.0, 1.0);
@@ -209,7 +215,7 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         for (int j = 0; j < buffer.getNumSamples(); j++) {
             float x = proccessedChannelData[j];
             float y = x - _xm1 + 0.995 * _ym1;
-            channelData[j] = y;
+            channelData[j] = channelData[j] * (1 - wet)  + y * wet; // Wet signal + Dry signal
             _xm1 = x; _ym1 = y;
         }
 #if(_DEBUG)
@@ -217,7 +223,7 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 #endif
     }
 
-	buffer.applyGain(stateInfo.getProperty("volume"));
+	buffer.applyGain(stateInfo.getProperty("output"));
 }
 
 //==============================================================================

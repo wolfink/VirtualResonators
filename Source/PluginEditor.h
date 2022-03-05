@@ -13,14 +13,16 @@
 #include "DecibelSlider.h"
 #include "NoteSlider.h"
 
-typedef enum Parameters {
+enum class Parameter {
     AddNoise,
-	BufferToggle,
-	DecayTime,
-	Frequency,
-	OutputVolume,
-	ResonatorVolume
-} Parameter;
+    BufferToggle,
+    DecayTime,
+    Frequency,
+    OutputVolume,
+    InputVolume,
+    WetDry,
+    ResonatorVolume
+};
 
 //==============================================================================
 /**
@@ -67,6 +69,8 @@ private:
     juce::Slider  resonatorDecay[NUM_RESONATORS];
     juce::Slider  volumeSlider[NUM_RESONATORS];
     juce::ShapeButton* pulseButtons[NUM_RESONATORS];
+    DecibelSlider inputVolumeSlider;
+    juce::Slider  wetDrySlider;
     DecibelSlider outputVolumeSlider;
 
     juce::Label   resonatorNumberLabel[NUM_RESONATORS];
@@ -75,6 +79,8 @@ private:
     juce::Label   resonatorOctaveLabel;
     juce::Label   resonatorDecayLabel;
     juce::Label   volumeSliderLabel;
+    juce::Label   inputVolumeLabel;
+    juce::Label   wetDryLabel;
     juce::Label   outputVolumeLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessorEditor)
