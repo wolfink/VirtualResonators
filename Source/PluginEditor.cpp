@@ -192,8 +192,7 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
     // editor's size to whatever you need it to be.
 #if(_DEBUG)
 	setSize(850, 600);
-#endif
-#if(_RELEASE)
+#else
     setSize (800, 600);
 #endif
 }
@@ -223,11 +222,10 @@ void ResonatorProjectAudioProcessorEditor::resized()
 	componentView->setBounds(800, 50, 50, 50);
 	valueTreeView->setBounds(800, 100, 50, 50);
 	fontAndColourView->setBounds(800, 150, 50, 50);
-    int knobWidth = (getWidth()-150) / NUM_RESONATORS * 0.8;
+    int knobWidth = (getWidth()-200) / NUM_RESONATORS * 0.8;
     int knobPadding = knobWidth * 0.25;
-#endif
-#if(_RELEASE)
-    int knobWidth = (getWidth()-100) / NUM_RESONATORS * 0.8;
+#else
+    int knobWidth = (getWidth()-150) / NUM_RESONATORS * 0.8;
     int knobPadding = knobWidth * 0.25;
 #endif
 	for (int i = 0; i < NUM_RESONATORS; i++) {

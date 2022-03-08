@@ -19,7 +19,7 @@ stateInfo("root")
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  juce::AudioChannelSet::mono(), true)
                       #endif
-                       .withOutput ("Output", juce::AudioChannelSet::mono(), true)
+                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        )
 #endif
@@ -104,7 +104,7 @@ void ResonatorProjectAudioProcessor::prepareToPlay (double sampleRate, int sampl
     for (int i = 0; i < NUM_RESONATORS; i++) {
         node = juce::ValueTree("resonator");
 		synths[i].setFrequency(440.0);
-		synths[i].prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32) samplesPerBlock, 1 }));
+		synths[i].prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32) samplesPerBlock, (juce::uint32) getNumOutputChannels() }));
 		resonatorFrequency[i] = 440.0;
 		noise[i] = false;
         node.setProperty("frequency", 440.0, nullptr);
@@ -191,7 +191,7 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 				juce::Random random;
 				random.setSeedRandomly();
 				for (int j = 0; j < (int)(getSampleRate() / resonatorFrequency[i]); j++) channelDataCopy[i][j] = random.nextFloat() * 2.0 - 1.0;
-                stateInfo.getChild(i).setProperty("add noise", false, nullptr);
+                if (channel == totalNumInputChannels - 1) stateInfo.getChild(i).setProperty("add noise", false, nullptr);
 			}
         }
 

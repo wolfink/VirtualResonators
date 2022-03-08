@@ -40,6 +40,6 @@ private:
     double _decay;
     double _damping;
     //double frequency;
-    SampleType _averagingSample;
+    std::vector<SampleType> _averagingSample;
     JUCE_LEAK_DETECTOR (StringModel)
 };

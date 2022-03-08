@@ -66,6 +66,7 @@ void StringModel<SampleType>::prepare(const juce::dsp::ProcessSpec& processSpec)
     _delayLine.setDelay(processSpec.sampleRate / frequency);
     _delayLine.prepare(processSpec);
     _sampleRate = processSpec.sampleRate;
+    _averagingSample.resize(processSpec.numChannels);
 }
 
 template void StringModel<float>::prepare(const juce::dsp::ProcessSpec& ps);
@@ -77,9 +78,9 @@ void StringModel<SampleType>::process(SampleType* samples, int channel, size_t n
 {
     for (int i = 0; i < numberOfSamples; i++)
     {
-        SampleType delayedSample = _delayLine.popSample(0);
-        samples[i] += _damping * (_decay * _averagingSample + (1 - _decay) * delayedSample);
-        _averagingSample = delayedSample;
+        SampleType delayedSample = _delayLine.popSample(channel);
+        samples[i] += _damping * (_decay * _averagingSample[channel] + (1 - _decay) * delayedSample);
+        _averagingSample[channel] = delayedSample;
         _delayLine.pushSample(channel, samples[i]);
     }
 }
