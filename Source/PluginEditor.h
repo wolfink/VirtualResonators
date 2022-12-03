@@ -12,6 +12,7 @@
 #include "PluginProcessor.h"
 #include "DecibelSlider.h"
 #include "NoteSlider.h"
+#include "VirtualResonators.h"
 
 enum class Parameter {
     AddNoise,
@@ -40,48 +41,51 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    ResonatorProjectAudioProcessor& audioProcessor;
-
-	void setParameter(Parameter parameter, juce::var& value, int index=0);
+    ResonatorProjectAudioProcessor& audio_processor;
 
 #if(_DEBUG)
-    juce::ShapeButton *bufferView;
-    juce::ShapeButton *componentView;
-    juce::ShapeButton *valueTreeView;
-    juce::ShapeButton *fontAndColourView;
+    ShapeButton* buffer_view;
+    ShapeButton* component_view;
+    ShapeButton* valueTree_view;
+    ShapeButton* fontAndColour_view;
 
     void toggleComponentDebugger();
     void openValueTreeDebugger();
     void toggleFontAndColourDesigner();
 
-    jcf::ComponentDebugger* componentDebugger;
-    jcf::ValueTreeDebugger* valueTreeDebugger;
-    jcf::FontAndColourDesigner* fontAndColourDesigner;
-    bool componentDebuggerOn;
-    bool fontAndColourDesignerOn;
+    jcf::ComponentDebugger*           componentDebugger;
+    jcf::ValueTreeDebugger*           valueTreeDebugger;
+    jcf::FontAndColourDesigner*   fontAndColourDesigner;
+    bool                            componentDebugger_on;
+    bool                        fontAndColourDesigner_on;
 #endif
 
-    juce::Slider  resonatorFrequency[NUM_RESONATORS];
-    NoteSlider    resonatorNoteValue[NUM_RESONATORS];
-    double resonatorBaseFrequency[NUM_RESONATORS]; // = { 32.70, 36.71, 41.20, 43.65, 49.00, 55.00, 61.74, 32.70 };
-    juce::Slider  resonatorOctave[NUM_RESONATORS];
-    double resonatorMultiplier[NUM_RESONATORS]; // = { 8.0,   8.0,   8.0,   8.0,   8.0,   8.0,   8.0,  16.0 };
-    juce::Slider  resonatorDecay[NUM_RESONATORS];
-    juce::Slider  volumeSlider[NUM_RESONATORS];
-    juce::ShapeButton* pulseButtons[NUM_RESONATORS];
-    DecibelSlider inputVolumeSlider;
-    juce::Slider  wetDrySlider;
-    DecibelSlider outputVolumeSlider;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> note_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> octave_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> decay_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> volume_attachments;
 
-    juce::Label   resonatorNumberLabel[NUM_RESONATORS];
-    juce::Label   resonatorFrequencyLabel;
-    juce::Label   resonatorNoteValueLabel;
-    juce::Label   resonatorOctaveLabel;
-    juce::Label   resonatorDecayLabel;
-    juce::Label   volumeSliderLabel;
-    juce::Label   inputVolumeLabel;
-    juce::Label   wetDryLabel;
-    juce::Label   outputVolumeLabel;
+    uptr<AudioProcessorValueTreeState::SliderAttachment> input_attachment;
+    uptr<AudioProcessorValueTreeState::SliderAttachment> wet_attachment;
+    uptr<AudioProcessorValueTreeState::SliderAttachment> output_attachment;
+
+    NoteSlider        resonator_note_values[NUM_RESONATORS];
+    Slider            resonator_octaves    [NUM_RESONATORS];
+    Slider            resonator_decays     [NUM_RESONATORS];
+    Slider            resonator_volumes    [NUM_RESONATORS];
+    uptr<ShapeButton> pluck_buttons        [NUM_RESONATORS];
+    DecibelSlider     input_volume_slider;
+    Slider            wet_slider;
+    DecibelSlider     output_volume_slider;
+
+    Label resonator_number_labels[NUM_RESONATORS];
+    Label resonator_note_value_label;
+    Label resonator_octave_label;
+    Label resonator_decay_label;
+    Label volume_slider_label;
+    Label input_volume_label;
+    Label wet_label;
+    Label output_volume_label;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessorEditor)
 };

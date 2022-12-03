@@ -15,7 +15,7 @@ double INITIAL_REGISTER[8] = { 4.0, 4.0, 4.0, 4.0, 4.0, 4.0,  4.0, 5.0 };
 
 //==============================================================================
 ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (ResonatorProjectAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+    : AudioProcessorEditor (&p), audio_processor (p)
 {
 
     // Useful variables
@@ -24,169 +24,150 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 	//path.addRectangle(50, 200, 50, 50);
 
 #if(_DEBUG)
-	bufferView = new juce::ShapeButton(
+	buffer_view = new juce::ShapeButton(
 				juce::String("Pulse"), 
 				juce::Colour(128, 0, 0), 
 				juce::Colour(150, 0, 0), 
 				juce::Colour(90, 0, 0)
 		);
-	componentView = new juce::ShapeButton(
+	component_view = new juce::ShapeButton(
 				juce::String("Pulse"), 
 				juce::Colour(0, 128, 0), 
 				juce::Colour(0, 150, 0), 
 				juce::Colour(0, 90, 0)
 		);
-	valueTreeView = new juce::ShapeButton(
+	valueTree_view = new juce::ShapeButton(
 				juce::String("Pulse"), 
 				juce::Colour(0, 0, 128), 
 				juce::Colour(0, 0, 150), 
 				juce::Colour(0, 0, 90)
 		);
-	fontAndColourView = new juce::ShapeButton(
+	fontAndColour_view = new juce::ShapeButton(
 				juce::String("Pulse"), 
 				juce::Colour(128, 0, 128), 
 				juce::Colour(150, 0, 150), 
 				juce::Colour(90, 0, 90)
 		);
 
-	bufferView->setShape(path, false, false, false);
-	bufferView->onClick = [this] { audioProcessor.toggleBufferDebugger(); };
-	addAndMakeVisible(bufferView);
+	buffer_view->setShape(path, false, false, false);
+	buffer_view->onClick = [this] { audio_processor.toggleBufferDebugger(); };
+	addAndMakeVisible(buffer_view);
 
-	componentView->setShape(path, false, false, false);
-	componentView->onClick = [this] { toggleComponentDebugger(); };
-	addAndMakeVisible(componentView);
-	componentDebuggerOn = false;
+	component_view->setShape(path, false, false, false);
+	component_view->onClick = [this] { toggleComponentDebugger(); };
+	addAndMakeVisible(component_view);
+	componentDebugger_on = false;
 
-	valueTreeView->setShape(path, false, false, false);
-	valueTreeView->onClick = [this] { openValueTreeDebugger(); };
-	addAndMakeVisible(valueTreeView);
+	valueTree_view->setShape(path, false, false, false);
+	valueTree_view->onClick = [this] { openValueTreeDebugger(); };
+	addAndMakeVisible(valueTree_view);
 
-	fontAndColourView->setShape(path, false, false, false);
-	fontAndColourView->onClick = [this] { toggleFontAndColourDesigner(); };
-	addAndMakeVisible(fontAndColourView);
-	fontAndColourDesignerOn = false;
+	fontAndColour_view->setShape(path, false, false, false);
+	fontAndColour_view->onClick = [this] { toggleFontAndColourDesigner(); };
+	addAndMakeVisible(fontAndColour_view);
+	fontAndColourDesigner_on = false;
 #endif
+
+	// Attach sliders to audio processer state tree
+	for (size_t i = 0; i < NUM_RESONATORS; i++) {
+		note_attachments.push_back   (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+			audio_processor.parameters,  NOTEVAL_ID(i), resonator_note_values[i]));
+		octave_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+			audio_processor.parameters, REGISTER_ID(i),     resonator_octaves[i]));
+		decay_attachments.push_back  (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+			audio_processor.parameters,    DECAY_ID(i),      resonator_decays[i]));
+		volume_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+			audio_processor.parameters,   VOLUME_ID(i),     resonator_volumes[i]));
+	}
+
+	input_attachment  = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+		audio_processor.parameters, INPUT_ID , input_volume_slider);
+	output_attachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+		audio_processor.parameters, OUTPUT_ID, output_volume_slider);
+	wet_attachment    = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+		audio_processor.parameters, WET_ID   , wet_slider);
 
     // Set parameters for resonator controls
     for (int i = 0; i < NUM_RESONATORS; i++) {
-		/*
-		resonatorFrequency[i].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-		resonatorFrequency[i].setRange(20.0, 10000.0, 0.7);
-		resonatorFrequency[i].setSkewFactor(.5);
-		resonatorFrequency[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-		resonatorFrequency[i].setPopupDisplayEnabled(true, false, this);
-		resonatorFrequency[i].setTextValueSuffix(" Hz");
-		resonatorFrequency[i].onValueChange = [this, i] { setParameter(Parameter:: Frequency, juce::var(resonatorFrequency[i].getValue()), i); };
-		resonatorFrequency[i].setValue(440.0);
-		*/
 
-		resonatorNoteValue[i].setPopupDisplayEnabled(true, false, this);
-		resonatorNoteValue[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-		resonatorNoteValue[i].onValueChange = [this, i] {
-			resonatorBaseFrequency[i] = 16.35 * pow(pow(2.0, resonatorNoteValue[i].getValue()), 1.0 / 12.0);
-			setParameter(Parameter::Frequency, juce::var(resonatorBaseFrequency[i] * resonatorMultiplier[i]), i);
-		};
-		resonatorNoteValue[i].setValue(INITIAL_SCALE[i]);
-		resonatorNoteValue[i].onValueChange();
+		resonator_note_values[i].setPopupDisplayEnabled (true, false, this);
+		resonator_note_values[i].setTextBoxStyle        (juce::Slider::NoTextBox, false, 90, 0);
 
-		resonatorOctave[i].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-		resonatorOctave[i].setRange(0.0, 8.0, 1.0);
-		resonatorOctave[i].setPopupDisplayEnabled(true, false, this);
-		resonatorOctave[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-		resonatorOctave[i].onValueChange = [this, i] {
-			resonatorMultiplier[i] = pow(2.0, resonatorOctave[i].getValue());
-			setParameter(Parameter::Frequency, juce::var(resonatorBaseFrequency[i] * resonatorMultiplier[i]), i);
-		};
-		resonatorOctave[i].setValue(INITIAL_REGISTER[i]);
-		resonatorOctave[i].onValueChange();
+		resonator_octaves[i].setSliderStyle             (juce::Slider::RotaryHorizontalVerticalDrag);
+		resonator_octaves[i].setRange                   (0.0, 8.0, 1.0);
+		resonator_octaves[i].setPopupDisplayEnabled     (true, false, this);
+		resonator_octaves[i].setTextBoxStyle            (juce::Slider::NoTextBox, false, 90, 0);
 		
-		resonatorNumberLabel[i].setText(std::to_string(i+1), juce::NotificationType::dontSendNotification);
-		resonatorNumberLabel[i].attachToComponent(&resonatorNoteValue[i], false);
+		resonator_number_labels[i].setText              (std::to_string(i+1), juce::NotificationType::dontSendNotification);
+		resonator_number_labels[i].attachToComponent    (&resonator_note_values[i], false);
 
-		resonatorDecay[i].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-		resonatorDecay[i].setRange(0., 100., 0.787);
-		resonatorDecay[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-		resonatorDecay[i].setPopupDisplayEnabled(true, false, this);
-		resonatorDecay[i].onValueChange = [this, i] { setParameter(Parameter::DecayTime, juce::var(0.5 - std::pow(resonatorDecay[i].getValue() / 100.0, 2.0) / 2.0), i); };
-		resonatorDecay[i].setValue(50.0);
+		resonator_decays[i].setSliderStyle              (juce::Slider::RotaryHorizontalVerticalDrag);
+		resonator_decays[i].setRange                    (0., 100.0, 100.0 / 127.0);
+		resonator_decays[i].setTextBoxStyle             (juce::Slider::NoTextBox, false, 90, 0);
+		resonator_decays[i].setPopupDisplayEnabled      (true, false, this);
 
-		pulseButtons[i] = new juce::ShapeButton(
-				juce::String("Pulse"), 
-				juce::Colour(128, 128, 128), 
-				juce::Colour(150, 150, 150), 
-				juce::Colour(90, 90, 90)
-		);
-		pulseButtons[i]->setShape(path, false, false, false);
-		pulseButtons[i]->onClick = [this, i] { setParameter(Parameter::AddNoise, juce::var(true), i); };
+		pluck_buttons[i] = std::make_unique<ShapeButton>(String("Pulse"), 
+			Colour(128, 128, 128), 
+			Colour(150, 150, 150), 
+			Colour(90, 90, 90));
+		pluck_buttons[i]->setShape                      (path, false, false, false);
+		pluck_buttons[i]->onClick = [this, i] { audio_processor.pluckResonator(i); };
 
-		volumeSlider[i].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-		volumeSlider[i].setRange(0.0, 10.0, 0.01);
-		volumeSlider[i].setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-		volumeSlider[i].setPopupDisplayEnabled(true, false, this);
-		volumeSlider[i].onValueChange = [this, i] { setParameter(Parameter::ResonatorVolume, juce::var(volumeSlider[i].getValue() / 10.0), i); };
-		volumeSlider[i].setValue(10.0);
+		resonator_volumes[i].setSliderStyle            (juce::Slider::RotaryHorizontalVerticalDrag);
+		resonator_volumes[i].setRange                  (0.0, 10.0, 10.0 / 127.0);
+		resonator_volumes[i].setTextBoxStyle           (juce::Slider::NoTextBox, false, 90, 0);
+		resonator_volumes[i].setPopupDisplayEnabled    (true, false, this);
 
-		//addAndMakeVisible(&resonatorFrequency[i]);
-		addAndMakeVisible(&resonatorNoteValue[i]);
-		addAndMakeVisible(&resonatorOctave[i]);
-		addAndMakeVisible(&resonatorDecay[i]);
-		addAndMakeVisible(&volumeSlider[i]);
-		addAndMakeVisible(pulseButtons[i]);
+		addAndMakeVisible(&resonator_note_values[i]);
+		addAndMakeVisible(&resonator_octaves[i]);
+		addAndMakeVisible(&resonator_decays[i]);
+		addAndMakeVisible(&resonator_volumes[i]);
+		addAndMakeVisible(pluck_buttons[i].get());
     }
 
     // Set parameters for output volume knob
-    outputVolumeSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    outputVolumeSlider.setRange(-100.0, 12.0, 0.1);
-    outputVolumeSlider.setSkewFactorFromMidPoint(0.0);
-    outputVolumeSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-    outputVolumeSlider.setPopupDisplayEnabled(true, false, this);
-    outputVolumeSlider.onValueChange = [this] { setParameter(Parameter::OutputVolume, juce::var(juce::Decibels::decibelsToGain(outputVolumeSlider.getValue()))); };
-    outputVolumeSlider.setValue(0.0);
+    output_volume_slider.setSliderStyle            (juce::Slider::RotaryHorizontalVerticalDrag);
+    output_volume_slider.setRange                  (-100.0, 12.0, 0.1);
+    output_volume_slider.setSkewFactorFromMidPoint (0.0);
+    output_volume_slider.setTextBoxStyle           (juce::Slider::NoTextBox, false, 90, 0);
+    output_volume_slider.setPopupDisplayEnabled    (true, false, this);
 
-    inputVolumeSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    inputVolumeSlider.setRange(-100.0, 12.0, 0.1);
-    inputVolumeSlider.setSkewFactorFromMidPoint(0.0);
-    inputVolumeSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-    inputVolumeSlider.setPopupDisplayEnabled(true, false, this);
-    inputVolumeSlider.onValueChange = [this] { setParameter(Parameter::InputVolume, juce::var(juce::Decibels::decibelsToGain(inputVolumeSlider.getValue()))); };
-    inputVolumeSlider.setValue(0.0);
+    input_volume_slider.setSliderStyle             (juce::Slider::RotaryHorizontalVerticalDrag);
+    input_volume_slider.setRange                   (-100.0, 12.0, 0.1);
+    input_volume_slider.setSkewFactorFromMidPoint  (0.0);
+    input_volume_slider.setTextBoxStyle            (juce::Slider::NoTextBox, false, 90, 0);
+    input_volume_slider.setPopupDisplayEnabled     (true, false, this);
 
-    wetDrySlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    wetDrySlider.setRange(0.0, 1.0, 1.0 / 127.0);
-    wetDrySlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-    wetDrySlider.setPopupDisplayEnabled(true, false, this);
-    wetDrySlider.onValueChange = [this] { setParameter(Parameter::WetDry, juce::var(wetDrySlider.getValue())); };
-    wetDrySlider.setValue(0.5);
+    wet_slider.setSliderStyle                      (juce::Slider::RotaryHorizontalVerticalDrag);
+    wet_slider.setRange                            (0.0, 1.0, 1.0 / 127.0);
+    wet_slider.setTextBoxStyle                     (juce::Slider::NoTextBox, false, 90, 0);
+    wet_slider.setPopupDisplayEnabled              (true, false, this);
 
-    addAndMakeVisible(&outputVolumeSlider);
-    addAndMakeVisible(&inputVolumeSlider);
-    addAndMakeVisible(&wetDrySlider);
+    addAndMakeVisible(&output_volume_slider);
+    addAndMakeVisible(&input_volume_slider);
+    addAndMakeVisible(&wet_slider);
 
     // Set parameters for labels
-	resonatorFrequencyLabel.setText("Frequency", juce::NotificationType::dontSendNotification);
-	resonatorFrequencyLabel.attachToComponent(&resonatorFrequency[0], true);
-	
-	resonatorNoteValueLabel.setText("Note", juce::NotificationType::dontSendNotification);
-	resonatorNoteValueLabel.attachToComponent(&resonatorNoteValue[0], true);
+	resonator_note_value_label.setText           ("Note", juce::NotificationType::dontSendNotification);
+	resonator_note_value_label.attachToComponent (&resonator_note_values[0], true);
 
-	resonatorOctaveLabel.setText("Octave", juce::NotificationType::dontSendNotification);
-	resonatorOctaveLabel.attachToComponent(&resonatorOctave[0], true);
+	resonator_octave_label.setText               ("Octave", juce::NotificationType::dontSendNotification);
+	resonator_octave_label.attachToComponent     (&resonator_octaves[0], true);
 
-    resonatorDecayLabel.setText("Decay", juce::NotificationType::dontSendNotification);
-    resonatorDecayLabel.attachToComponent(&resonatorDecay[0], true);
+    resonator_decay_label.setText                ("Decay", juce::NotificationType::dontSendNotification);
+    resonator_decay_label.attachToComponent      (&resonator_decays[0], true);
     
-	volumeSliderLabel.setText("Volume", juce::NotificationType::dontSendNotification);
-	volumeSliderLabel.attachToComponent(&volumeSlider[0], true);
+	volume_slider_label.setText                  ("Volume", juce::NotificationType::dontSendNotification);
+	volume_slider_label.attachToComponent        (&resonator_volumes[0], true);
 
-    outputVolumeLabel.setText("Output", juce::NotificationType::dontSendNotification);
-    outputVolumeLabel.attachToComponent(&outputVolumeSlider, false);
+    output_volume_label.setText                  ("Output", juce::NotificationType::dontSendNotification);
+    output_volume_label.attachToComponent        (&output_volume_slider, false);
 
-    inputVolumeLabel.setText("Input", juce::NotificationType::dontSendNotification);
-    inputVolumeLabel.attachToComponent(&inputVolumeSlider, false);
+    input_volume_label.setText                   ("Input", juce::NotificationType::dontSendNotification);
+    input_volume_label.attachToComponent         (&input_volume_slider, false);
 
-    wetDryLabel.setText("Wet", juce::NotificationType::dontSendNotification);
-    wetDryLabel.attachToComponent(&wetDrySlider, false);
+    wet_label.setText                            ("Wet", juce::NotificationType::dontSendNotification);
+    wet_label.attachToComponent                  (&wet_slider, false);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -199,7 +180,6 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 
 ResonatorProjectAudioProcessorEditor::~ResonatorProjectAudioProcessorEditor()
 {
-	for (int i = 0; i < NUM_RESONATORS; i++) delete pulseButtons[i];
 }
 
 //==============================================================================
@@ -218,10 +198,10 @@ void ResonatorProjectAudioProcessorEditor::resized()
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
 #if(_DEBUG)
-	bufferView->setBounds(800, 0, 50, 50);
-	componentView->setBounds(800, 50, 50, 50);
-	valueTreeView->setBounds(800, 100, 50, 50);
-	fontAndColourView->setBounds(800, 150, 50, 50);
+	buffer_view->setBounds(800, 0, 50, 50);
+	component_view->setBounds(800, 50, 50, 50);
+	valueTree_view->setBounds(800, 100, 50, 50);
+	fontAndColour_view->setBounds(800, 150, 50, 50);
     int knobWidth = (getWidth()-200) / NUM_RESONATORS * 0.8;
     int knobPadding = knobWidth * 0.25;
 #else
@@ -229,65 +209,30 @@ void ResonatorProjectAudioProcessorEditor::resized()
     int knobPadding = knobWidth * 0.25;
 #endif
 	for (int i = 0; i < NUM_RESONATORS; i++) {
-        /*
-		resonatorFrequency[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50, knobWidth, knobWidth);
-		*/
-		resonatorNoteValue[i].setBounds (100 + knobPadding*(i + 1) + knobWidth*i, 50                              , knobWidth, knobWidth);
-		resonatorOctave[i].setBounds    (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 1*(knobWidth + knobPadding), knobWidth, knobWidth);
-		resonatorDecay[i].setBounds     (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 2*(knobWidth + knobPadding), knobWidth, knobWidth);
-		volumeSlider[i].setBounds       (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 3*(knobWidth + knobPadding), knobWidth, knobWidth);
-		pulseButtons[i]->setBounds      (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 4*(knobWidth + knobPadding), knobWidth, knobWidth);
+		//resonatorFrequency[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50, knobWidth, knobWidth);
+		resonator_note_values[i].setBounds (100 + knobPadding*(i + 1) + knobWidth*i, 50                              , knobWidth, knobWidth);
+		resonator_octaves[i].setBounds    (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 1*(knobWidth + knobPadding), knobWidth, knobWidth);
+		resonator_decays[i].setBounds     (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 2*(knobWidth + knobPadding), knobWidth, knobWidth);
+		resonator_volumes[i].setBounds       (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 3*(knobWidth + knobPadding), knobWidth, knobWidth);
+		pluck_buttons[i]->setBounds      (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 4*(knobWidth + knobPadding), knobWidth, knobWidth);
 	}
-	inputVolumeSlider.setBounds  (350, 500, 100, 100);
-	wetDrySlider.setBounds       (500, 500, 100, 100);
-    outputVolumeSlider.setBounds (650, 500, 100, 100);
-}
-
-void ResonatorProjectAudioProcessorEditor::setParameter(Parameter parameter, juce::var& value, int index)
-{
-	juce::MemoryBlock memory(sizeof(juce::ValueTree));
-	audioProcessor.getStateInformation(memory);
-	juce::ValueTree* tree = (juce::ValueTree*) memory.getData();
-	switch (parameter) {
-	case Parameter::Frequency:
-		tree->getChild(index).setProperty("frequency", value, nullptr);
-		break;
-	case Parameter::DecayTime:
-		tree->getChild(index).setProperty("decay time", value, nullptr);
-		break;
-	case Parameter::ResonatorVolume:
-		tree->getChild(index).setProperty("volume", value, nullptr);
-		break;
-	case Parameter::AddNoise:
-		tree->getChild(index).setProperty("add noise", value, nullptr);
-		break;
-	case Parameter::BufferToggle:
-		tree->getChildWithName("buffer debugger").setProperty("on", value, nullptr);
-		break;
-	case Parameter::OutputVolume:
-		tree->setProperty("output", value, nullptr);
-		break;
-	case Parameter::InputVolume:
-		tree->setProperty("input", value, nullptr);
-		break;
-	case Parameter::WetDry:
-		tree->setProperty("wet", value, nullptr);
-	}
-	audioProcessor.setStateInformation((void*) tree, sizeof(juce::ValueTree));
+	input_volume_slider.setBounds  (350, 500, 100, 100);
+	wet_slider.setBounds       (500, 500, 100, 100);
+    output_volume_slider.setBounds (650, 500, 100, 100);
 }
 
 #if(_DEBUG)
 void ResonatorProjectAudioProcessorEditor::toggleComponentDebugger()
 {
-    if (!componentDebuggerOn) componentDebugger = new jcf::ComponentDebugger(this);
+    if (!componentDebugger_on) componentDebugger = new jcf::ComponentDebugger(this);
     else delete componentDebugger;
-    componentDebuggerOn = !componentDebuggerOn;
+    componentDebugger_on = !componentDebugger_on;
 }
 
 void ResonatorProjectAudioProcessorEditor::openValueTreeDebugger()
 {
 	juce::MemoryBlock stateInfo(sizeof(juce::ValueTree));
-	audioProcessor.getStateInformation(stateInfo);
+	audio_processor.getStateInformation(stateInfo);
 	juce::ValueTree tree = *(juce::ValueTree *) stateInfo.getData();
     valueTreeDebugger = new jcf::ValueTreeDebugger(tree);
 }

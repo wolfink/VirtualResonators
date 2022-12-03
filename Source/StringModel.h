@@ -11,6 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "VirtualResonators.h"
 
 #define STRING_MAX_DUR 20.0
 
@@ -24,22 +25,25 @@ template <typename SampleType>
 class StringModel
 {
 public:
-    StringModel(double sampleRate);
-    StringModel(const StringModel<SampleType>& stringModel);
+    StringModel(double sample_rate);
+    StringModel(const StringModel<SampleType>& string_model);
     //StringModel(const juce::dsp::ProcessSpec& processSpec);
     ~StringModel();
 
     void setFrequency(double frequency);
     void setDecay(double decay);
-    void prepare(const juce::dsp::ProcessSpec& processSpec);
-    void process(SampleType* samples, int channel, size_t numberOfSamples);
+    void setVolume(double volume);
+    void prepare(const juce::dsp::ProcessSpec& process_spec);
+    void process(SampleType* samples, int channel, size_t number_of_samples);
+    void pluck(int channel);
 private:
-    juce::dsp::DelayLine<SampleType, juce::dsp::DelayLineInterpolationTypes::Thiran> _delayLine;
+    dsp::DelayLine<SampleType, dsp::DelayLineInterpolationTypes::Thiran> _delay_line;
     //juce::dsp::ProcessSpec processSpec;
-    double _sampleRate;
+    double _sample_rate;
     double _decay;
     double _damping;
+    double _volume;
     //double frequency;
-    std::vector<SampleType> _averagingSample;
+    std::vector<SampleType> _averaging_sample;
     JUCE_LEAK_DETECTOR (StringModel)
 };

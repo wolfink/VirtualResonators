@@ -10,13 +10,30 @@
 
 #include <JuceHeader.h>
 #include "StringModel.h"
+#include "VirtualResonators.h"
 
 #define NUM_RESONATORS 8
+
+// Names and IDs for parameters
+#define    NOTEVAL_ID(index) "note value "          + std::to_string(index)
+#define  NOTEVAL_NAME(index) "Note->Resonator "     + std::to_string(index)
+#define   REGISTER_ID(index) "note register "       + std::to_string(index)
+#define REGISTER_NAME(index) "Register->Resonator " + std::to_string(index)
+#define      DECAY_ID(index) "decay "               + std::to_string(index)
+#define    DECAY_NAME(index) "Decay->Resonator "    + std::to_string(index)
+#define     VOLUME_ID(index) "resonator volume "    + std::to_string(index)
+#define   VOLUME_NAME(index) "Volume->Resonator "   + std::to_string(index)
+#define      INPUT_ID        "input volume"
+#define    INPUT_NAME        "Input"
+#define        WET_ID        "wet"
+#define      WET_NAME        "Wet %"
+#define     OUTPUT_ID        "output"
+#define   OUTPUT_NAME        "Output"
 
 //==============================================================================
 /**
 */
-class ResonatorProjectAudioProcessor : public juce::AudioProcessor
+class ResonatorProjectAudioProcessor : public AudioProcessor
 {
 public:
     //==============================================================================
@@ -31,14 +48,14 @@ public:
     bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
 #endif
 
-    void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void processBlock(AudioBuffer<float>&, MidiBuffer&) override;
 
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
     //==============================================================================
-    const juce::String getName() const override;
+    const String getName() const override;
 
     bool acceptsMidi() const override;
     bool producesMidi() const override;
@@ -49,7 +66,7 @@ public:
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram(int index) override;
-    const juce::String getProgramName(int index) override;
+    const String getProgramName(int index) override;
     void changeProgramName(int index, const juce::String& newName) override;
 
     //==============================================================================
@@ -65,24 +82,25 @@ public:
     void setFrequency(int index, double newFrequency);
     void setDecay(int index, double newTension);
     void setVolume(double newVolume);
-    void addNoise(int index);
+    void pluckResonator(int index);
+
+    AudioProcessorValueTreeState parameters;
     
 private:
     //==============================================================================
+
 #if(_DEBUG)
     jcf::BufferDebugger* bufferDebugger;
-    bool bufferDebuggerOn;
+    bool bufferDebuggerOn = false;
+    bool _plucked          = false;
 #endif
-    juce::ValueTree stateInfo;
+
     std::vector<StringModel<float>> synths;
-    float volume;
-    float outputVolume;
-    double resonatorFrequency[NUM_RESONATORS];
-    //double resonatorTension;
-    bool noise[NUM_RESONATORS];
+
     // For DC Blocking
     float _xm1;
     float _ym1;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessor)
 };
