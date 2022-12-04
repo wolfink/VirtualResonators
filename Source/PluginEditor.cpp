@@ -56,7 +56,6 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 	component_view->setShape(path, false, false, false);
 	component_view->onClick = [this] { toggleComponentDebugger(); };
 	addAndMakeVisible(component_view);
-	componentDebugger_on = false;
 
 	valueTree_view->setShape(path, false, false, false);
 	valueTree_view->onClick = [this] { openValueTreeDebugger(); };
@@ -65,7 +64,6 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 	fontAndColour_view->setShape(path, false, false, false);
 	fontAndColour_view->onClick = [this] { toggleFontAndColourDesigner(); };
 	addAndMakeVisible(fontAndColour_view);
-	fontAndColourDesigner_on = false;
 #endif
 
 	// Attach sliders to audio processer state tree
@@ -180,6 +178,11 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 
 ResonatorProjectAudioProcessorEditor::~ResonatorProjectAudioProcessorEditor()
 {
+#if(_DEBUG)
+	if (componentDebugger != nullptr)     delete componentDebugger;
+	if (valueTreeDebugger != nullptr)     delete valueTreeDebugger;
+	if (fontAndColourDesigner != nullptr) delete fontAndColourDesigner;
+#endif
 }
 
 //==============================================================================
@@ -222,18 +225,20 @@ void ResonatorProjectAudioProcessorEditor::resized()
 }
 
 #if(_DEBUG)
+using namespace jcf;
 void ResonatorProjectAudioProcessorEditor::toggleComponentDebugger()
 {
-    if (!componentDebugger_on) componentDebugger = new jcf::ComponentDebugger(this);
+    if (componentDebugger == nullptr)
+		componentDebugger = new ComponentDebugger(this);
     else delete componentDebugger;
-    componentDebugger_on = !componentDebugger_on;
 }
 
 void ResonatorProjectAudioProcessorEditor::openValueTreeDebugger()
 {
-	juce::MemoryBlock stateInfo(sizeof(juce::ValueTree));
+	MemoryBlock stateInfo(sizeof(ValueTree));
 	audio_processor.getStateInformation(stateInfo);
-	juce::ValueTree tree = *(juce::ValueTree *) stateInfo.getData();
+	ValueTree tree = *(ValueTree *) stateInfo.getData();
+	if (valueTreeDebugger != nullptr) delete valueTreeDebugger;
     valueTreeDebugger = new jcf::ValueTreeDebugger(tree);
 }
 

@@ -9,7 +9,6 @@
 */
 
 #pragma once
-using namespace juce;
 
 template<typename T>
 using uptr = std::unique_ptr<T>;

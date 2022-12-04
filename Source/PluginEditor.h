@@ -53,11 +53,9 @@ private:
     void openValueTreeDebugger();
     void toggleFontAndColourDesigner();
 
-    jcf::ComponentDebugger*           componentDebugger;
-    jcf::ValueTreeDebugger*           valueTreeDebugger;
-    jcf::FontAndColourDesigner*   fontAndColourDesigner;
-    bool                            componentDebugger_on;
-    bool                        fontAndColourDesigner_on;
+    jcf::ComponentDebugger*     componentDebugger     = nullptr;
+    jcf::ValueTreeDebugger*     valueTreeDebugger     = nullptr;
+    jcf::FontAndColourDesigner* fontAndColourDesigner = nullptr;
 #endif
 
     std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> note_attachments;
