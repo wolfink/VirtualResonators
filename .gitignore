@@ -6,6 +6,9 @@
 ## Ignore everything but the source code
 Builds/
 JuceLibraryCode/
+Test/modules/
+Test/VirtualResonatorsTest/
+Logs/
 .vs/
 *.filtergraph
 /roadmap.txt
