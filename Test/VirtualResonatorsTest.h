@@ -19,59 +19,42 @@
 
 #pragma once
 
-class PluginProcessorTest : public UnitTest
+class StdOutLogger : public Logger
 {
-public:
-    PluginProcessorTest() : UnitTest("PluginProcessor") {}
-
-    void runTest() override
+    void logMessage(const String& message)
     {
-        beginTest("Test initilization");
-
-        MessageManager* message_manager = MessageManager::getInstance();
-
-        ResonatorProjectAudioProcessor audio_processor;
-
-        beginTest("Test getStateInformation and setStateInformation");
-
-        MemoryBlock mem(sizeof(ValueTree));
-        audio_processor.getStateInformation(mem);
-        ValueTree stateInfo = *(ValueTree*)mem.getData();
-        std::cout << stateInfo.toXmlString() << std::endl;
-        stateInfo.getChildWithProperty("id", "decay 0").setProperty("value", 1.0, nullptr);
-        audio_processor.setStateInformation((void *) &stateInfo, sizeof(stateInfo));
-        audio_processor.getStateInformation(mem);
-        stateInfo = *(ValueTree*)mem.getData();
-
-        double test_val = stateInfo.getChildWithProperty("id", "decay 0").getProperty("value");
-        String failure_message = "Expected: 1.0\nActual: " + Value(test_val).toString();
-
-        expectEquals(test_val, 1.0, failure_message);
+        std::cout << message << std::endl;
     }
 };
 
-static PluginProcessorTest pluginProcessor_test;
+#include "UnitTests/PluginProcessorTest.h"
 
 //==============================================================================
 int main (int argc, char* argv[])
 {
 
     UnitTestRunner runner;
-    runner.setAssertOnFailure(false);
+    StdOutLogger* stdout_logger = new StdOutLogger();
+    runner.setAssertOnFailure(true);
 
     std::cout << "========== BEGIN UNIT TESTS ==========" << std::endl;
 
+
+    Logger::setCurrentLogger(stdout_logger);
     runner.runAllTests();
 
     std::cout << "=========== END UNIT TESTS ===========" << std::endl;
+    int num_fail = 0;
+    int num_pass = 0;
     for (int i = 0; i < runner.getNumResults(); i++) {
-        if (runner.getResult(i)->failures > 0) {
-            std::cout << "Some tests failed!" << std::endl;
-            goto LEAVE;
-        }
+        const UnitTestRunner::TestResult* test_result = runner.getResult(i);
+		num_fail += test_result->failures;
+		num_pass += test_result->passes;
     }
-    std::cout << "All tests passed!" << std::endl;
-LEAVE:
+    if (num_fail == 0)
+		std::cout << "All tests passed!" << std::endl;
+    else
+        std::cout << num_pass << " test(s) passed, but " << num_fail << " failed!" << std::endl;
     system("pause");
     return 0;
 }
