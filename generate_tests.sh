@@ -46,7 +46,7 @@ if [ $RUN -eq 1 ]; then
 
     # Execute test project
     if [ -f $EXEC_PATH ]; then
-        ./$EXEC_PATH > $LOGS_DIR/results.log
+        ./$EXEC_PATH | tee $LOGS_DIR/results.log
     else
         echo "Build failed, check $LOGS_DIR/test.log"
     fi

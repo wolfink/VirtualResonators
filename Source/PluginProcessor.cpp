@@ -281,16 +281,17 @@ void ResonatorProjectAudioProcessor::getStateInformation (juce::MemoryBlock& des
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    ValueTree* parameter_tree = new ValueTree(parameters.copyState());
-    destData.copyFrom((void *) parameter_tree, 0, sizeof(juce::ValueTree));
+    String xml = parameters.state.toXmlString();
+    destData.setSize(xml.length());
+    destData.copyFrom((void *) xml.toRawUTF8(), 0, xml.length());
 }
 
 void ResonatorProjectAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
-    jassert(sizeInBytes == sizeof(juce::ValueTree));
-    parameters.replaceState(*(juce::ValueTree*) data);
+    ValueTree new_state = ValueTree().fromXml(*parseXML(String((char*)data, sizeInBytes)));
+    parameters.state.copyPropertiesAndChildrenFrom(new_state, nullptr);
 }
 
 //==============================================================================

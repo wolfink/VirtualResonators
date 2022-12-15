@@ -35,6 +35,7 @@ int main (int argc, char* argv[])
 
     UnitTestRunner runner;
     StdOutLogger* stdout_logger = new StdOutLogger();
+    //MessageManager* message_manager = MessageManager::getInstance();
     runner.setAssertOnFailure(true);
 
     std::cout << "========== BEGIN UNIT TESTS ==========" << std::endl;
