@@ -14,10 +14,14 @@ PROJUCER_PATH=D:/JUCE/Projucer.exe
 PROJUCER_USER_MODULE_PATH=D:/Documents/JUCE/modules
 MSBUILD_PATH="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/MSBuild.exe"
 
-# Remove generated directory, if still present
-rm -r $GEN_DIR 2> /dev/null
-
 echo "Generating test project..."
+
+# Remove generated directory, if still present
+if test -e "$GEN_DIR"; then
+    echo "* Generated directory found, deleting..."
+    rm -r $GEN_DIR || { read -s -n 1 -p "Press any key to continue..."; exit 1; }
+fi
+
 # Create source module
 ./$DIR/generate_source_module.sh 6.1.4 JuceLibraryCode/modules Source $DIR/modules
 
@@ -37,6 +41,8 @@ sed -i /"MODULEPATH id=\"jcf_debug\""/s/"path".*/"path=\"${JCF_PATH}\"\/>"/ $GEN
 
 #mv $DIR/AppConfig.h $GEN_DIR/JuceLibraryCode
 
+echo "Test project successfully generated..."
+
 # Run tests
 if [ $RUN -eq 1 ]; then
     echo "Building tests..."
@@ -53,4 +59,7 @@ if [ $RUN -eq 1 ]; then
 
     # Remove generated files
     rm -r $GEN_DIR
+else
+    read -s -n 1 -p "Press any key to continue..."
+    echo ""
 fi
