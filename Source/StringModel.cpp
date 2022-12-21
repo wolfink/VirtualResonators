@@ -85,12 +85,16 @@ template <typename SampleType>
 void StringModel<SampleType>::pluck(int channel)
 {
     size_t num_samples = _delay_line.getDelay();
+    clear();
     for (int i = 0; i < NUM_IN_CHAN; i++) {
 		juce::Random random;
 		random.setSeedRandomly();
-		for (int j = 0; j < num_samples; j++)
+        for (int j = 0; j < num_samples; j++) {
 			_delay_line.pushSample(channel, random.nextFloat() * 2.0 - 1.0);
+            _delay_line.popSample(channel);
+        }
     }
+	_delay_line.popSample(channel);
 }
 
 template void StringModel<float>::pluck(int channel);

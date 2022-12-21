@@ -51,14 +51,16 @@ public:
 		for (int _ = 0; _ < 3; _++) {
 			float* data = buffer.getWritePointer(0);
 			buffer.clear();
-			string->clear();
+			//string->clear();
 			string->pluck(0);
-			string->process(data, 0, num_buckets);
+			for (int _ = 0; _ < 10; _++) {
+				string->process(data, 0, num_buckets);
+			}
 			fft.performFrequencyOnlyForwardTransform(data);
 
 			double max  = 0.0;
 			int arg_max = 0;
-			for (int i = 0; i < num_buckets / 2; i++) {
+			for (int i = 1; i < num_buckets / 2; i++) {
 				if (data[i] > max) {
 					max = data[i];
 					arg_max = i;
