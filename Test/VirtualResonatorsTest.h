@@ -28,6 +28,7 @@ class StdOutLogger : public Logger
 };
 
 #include "UnitTests/PluginProcessorTest.h"
+#include "UnitTests/StringModelTest.h"
 
 //==============================================================================
 int main (int argc, char* argv[])

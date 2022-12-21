@@ -36,6 +36,10 @@ public:
     void prepare(const juce::dsp::ProcessSpec& process_spec);
     void process(SampleType* samples, int channel, size_t number_of_samples);
     void pluck(int channel);
+    void clear()
+    {
+      _delay_line.reset();
+    }
 private:
     dsp::DelayLine<SampleType, dsp::DelayLineInterpolationTypes::Thiran> _delay_line;
     //juce::dsp::ProcessSpec processSpec;
