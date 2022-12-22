@@ -15,7 +15,7 @@ public:
 		beginTest("Test initialization");
 
 		try {
-			string = uptr<StringModel<float>>(new StringModel<float>(spec.sampleRate));
+			string = uptr<StringModel>(new StringModel(spec.sampleRate));
 			AudioBuffer<float> buffer(spec.numChannels, spec.maximumBlockSize);
 
 			string->prepare(spec);
@@ -73,6 +73,6 @@ public:
 private:
 	const int fft_order         = 12;
 	const dsp::ProcessSpec spec = { 44100.0, uint32(1 << (fft_order + 1)), 1 };
-	uptr<StringModel<float>> string;
+	uptr<StringModel> string;
 };
 StringModelTest StringModel_test;

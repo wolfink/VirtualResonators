@@ -60,7 +60,7 @@ ResonatorProjectAudioProcessor::ResonatorProjectAudioProcessor() :
 #endif
     ),
 #endif
-    synths(std::vector<StringModel<float>>(NUM_RESONATORS, StringModel<float>(44100))),
+    synths(std::vector<StringModel>(NUM_RESONATORS, StringModel(44100))),
     parameters(*this, nullptr, "PARAMS", createParamLayout()),
     _xm1(0.0),
     _ym1(0.0)
@@ -200,17 +200,17 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     {
         auto  channel_data  = buffer.getWritePointer (channel);
 
-        float input_volume  = *parameters.getRawParameterValue(INPUT_ID);
+        float input_volume  = PARAM_VAL(INPUT_ID);
         input_volume        = Decibels::decibelsToGain(input_volume);
 
 		buffer.applyGain(input_volume);
 
         // Update synthesizer parameters, and add noise, before processing audio
         for (int i = 0; i < NUM_RESONATORS; i++) {
-            float octave    = *parameters.getRawParameterValue(REGISTER_ID(i));
-            float note      = *parameters.getRawParameterValue(NOTEVAL_ID(i));
-            float decay     = *parameters.getRawParameterValue(DECAY_ID(i)) / 200;
-            float volume    = *parameters.getRawParameterValue(VOLUME_ID(i)) / 10 / NUM_RESONATORS;
+            float octave    = PARAM_VAL(REGISTER_ID(i));
+            float note      = PARAM_VAL(NOTEVAL_ID(i));
+            float decay     = PARAM_VAL(DECAY_ID(i)) / 200;
+            float volume    = PARAM_VAL(VOLUME_ID(i)) / 10;
 			float frequency = 440.0 * std::pow(2, (octave - 4.0) +  (note - 9.0) / 12.0);
             synths[i].setFrequency(frequency);
             synths[i].setDecay(decay);
@@ -218,8 +218,7 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         }
 
 
-        float  gamma               = 0.2;
-        float  wet                 = *parameters.getRawParameterValue(WET_ID);
+        float  wet                 = PARAM_VAL(WET_ID);
         float* output_channel_data = new float[buffer.getNumSamples()]{ 0 };
 #if(_DEBUG)
 		bufferDebugger->capture("Pre FX", channel_data, num_samples, -1.0, 1.0);
@@ -228,8 +227,11 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 			AudioBuffer<float> buffer_copy;
             buffer_copy.makeCopyOf(buffer);
             auto channel_data_copy = buffer_copy.getWritePointer(channel);
+
 			synths[i].process(channel_data_copy, channel, num_samples);
-            for (int j = 0; j < num_samples; j++) output_channel_data[j] += gamma * channel_data_copy[j];
+
+            for (int j = 0; j < num_samples; j++)
+                output_channel_data[j] += channel_data_copy[j] / NUM_RESONATORS;
 #if(_DEBUG)
 			bufferDebugger->capture("Post FX #" + std::to_string(i), output_channel_data, num_samples, -1.0, 1.0);
 #endif
@@ -248,20 +250,18 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     }
 
     for (int channel = 0; channel < num_output_channels; channel++) {
-        // For mono input
+        // For mono input, copy values into all other channels
         if (num_input_channels == 1 && channel > 0) {
             auto mono_channel_data = buffer.getWritePointer(0);
             auto curr_channel_data = buffer.getWritePointer(channel);
             for (int i = 0; i < num_samples; i++) curr_channel_data[i] = mono_channel_data[i];
         }
-		float output_volume = *parameters.getRawParameterValue(OUTPUT_ID);
+
+		float output_volume = PARAM_VAL(OUTPUT_ID);
 		output_volume       = Decibels::decibelsToGain(output_volume);
+
 		buffer.applyGain(output_volume);
     }
-#if(_DEBUG)
-    _plucked = false;
-#endif
-
 }
 
 //==============================================================================
@@ -302,35 +302,10 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 }
 
 //==============================================================================
-void ResonatorProjectAudioProcessor::setOutputVolume(double newInputVolume)
-{
-}
-
-void ResonatorProjectAudioProcessor::setFrequency(int index, double newFrequency)
-{
-    jassert(index < NUM_RESONATORS);
-    //resonatorFrequency[index] = newFrequency;
-    synths[index].setFrequency(newFrequency);
-}
-
-void ResonatorProjectAudioProcessor::setDecay(int index, double newTension)
-{
-    //resonatorTension = newTension;
-    synths[index].setDecay(newTension);
-}
-
-void ResonatorProjectAudioProcessor::setVolume(double newVolume)
-{
-    //volume = newVolume;
-}
-
 void ResonatorProjectAudioProcessor::pluckResonator(int index)
 {
     for(int channel = 0; channel < getTotalNumInputChannels(); channel++)
 		synths[index].pluck(channel);
-#if(_DEBUG)
-    _plucked = true;
-#endif
 }
 
 #if(_DEBUG)

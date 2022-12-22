@@ -30,6 +30,8 @@
 #define     OUTPUT_ID        "output"
 #define   OUTPUT_NAME        "Output"
 
+#define PARAM_VAL(name) *parameters.getRawParameterValue(name)
+
 //==============================================================================
 /**
 */
@@ -78,10 +80,6 @@ public:
 #if(_DEBUG)
     void toggleBufferDebugger();
 #endif
-    void setOutputVolume(double newInputVolume);
-    void setFrequency(int index, double newFrequency);
-    void setDecay(int index, double newTension);
-    void setVolume(double newVolume);
     void pluckResonator(int index);
 
     AudioProcessorValueTreeState parameters;
@@ -92,10 +90,9 @@ private:
 #if(_DEBUG)
     jcf::BufferDebugger* bufferDebugger;
     bool bufferDebuggerOn = false;
-    bool _plucked          = false;
 #endif
 
-    std::vector<StringModel<float>> synths;
+    std::vector<StringModel> synths;
 
     // For DC Blocking
     float _xm1;
