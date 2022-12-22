@@ -21,6 +21,8 @@
 #define REGISTER_NAME(index) "Register->Resonator " + std::to_string(index)
 #define      DECAY_ID(index) "decay "               + std::to_string(index)
 #define    DECAY_NAME(index) "Decay->Resonator "    + std::to_string(index)
+#define    DAMPING_ID(index) "damping "             + std::to_string(index)
+#define  DAMPING_NAME(index) "Damping->Resonator"   + std::to_string(index)
 #define     VOLUME_ID(index) "resonator volume "    + std::to_string(index)
 #define   VOLUME_NAME(index) "Volume->Resonator "   + std::to_string(index)
 #define      INPUT_ID        "input volume"

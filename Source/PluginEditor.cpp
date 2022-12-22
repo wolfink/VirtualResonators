@@ -74,6 +74,8 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 			audio_processor.parameters, REGISTER_ID(i),     resonator_octaves[i]));
 		decay_attachments.push_back  (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
 			audio_processor.parameters,    DECAY_ID(i),      resonator_decays[i]));
+		damping_attachments.push_back  (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+			audio_processor.parameters,  DAMPING_ID(i),      resonator_decays[i]));
 		volume_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
 			audio_processor.parameters,   VOLUME_ID(i),     resonator_volumes[i]));
 	}
@@ -104,6 +106,11 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		resonator_decays[i].setTextBoxStyle             (juce::Slider::NoTextBox, false, 90, 0);
 		resonator_decays[i].setPopupDisplayEnabled      (true, false, this);
 
+		resonator_dampings[i].setSliderStyle            (juce::Slider::RotaryHorizontalVerticalDrag);
+		resonator_dampings[i].setRange                  (0.0, 4.0, 4.0 / 127.0);
+		resonator_dampings[i].setTextBoxStyle           (juce::Slider::NoTextBox, false, 90, 0);
+		resonator_dampings[i].setPopupDisplayEnabled    (true, false, this);
+
 		pluck_buttons[i] = std::make_unique<ShapeButton>(String("Pulse"), 
 			Colour(128, 128, 128), 
 			Colour(150, 150, 150), 
@@ -117,9 +124,10 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		resonator_volumes[i].setPopupDisplayEnabled    (true, false, this);
 
 		addAndMakeVisible(&resonator_note_values[i]);
-		addAndMakeVisible(&resonator_octaves[i]);
-		addAndMakeVisible(&resonator_decays[i]);
-		addAndMakeVisible(&resonator_volumes[i]);
+		addAndMakeVisible(    &resonator_octaves[i]);
+		addAndMakeVisible(     &resonator_decays[i]);
+		addAndMakeVisible(    &resonator_volumes[i]);
+		addAndMakeVisible(    &resonator_dampings[i]);
 		addAndMakeVisible(pluck_buttons[i].get());
     }
 
@@ -154,6 +162,9 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 
     resonator_decay_label.setText                ("Decay", juce::NotificationType::dontSendNotification);
     resonator_decay_label.attachToComponent      (&resonator_decays[0], true);
+
+	resonator_damping_label.setText              ("Damping", juce::NotificationType::dontSendNotification);
+	resonator_damping_label.attachToComponent    (&resonator_dampings[0], true);
     
 	volume_slider_label.setText                  ("Volume", juce::NotificationType::dontSendNotification);
 	volume_slider_label.attachToComponent        (&resonator_volumes[0], true);
@@ -170,9 +181,9 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 #if(_DEBUG)
-	setSize(850, 600);
+	setSize(850, 700);
 #else
-    setSize (800, 600);
+    setSize (800, 700);
 #endif
 }
 
@@ -214,14 +225,15 @@ void ResonatorProjectAudioProcessorEditor::resized()
 	for (int i = 0; i < NUM_RESONATORS; i++) {
 		//resonatorFrequency[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50, knobWidth, knobWidth);
 		resonator_note_values[i].setBounds (100 + knobPadding*(i + 1) + knobWidth*i, 50                              , knobWidth, knobWidth);
-		resonator_octaves[i].setBounds    (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 1*(knobWidth + knobPadding), knobWidth, knobWidth);
-		resonator_decays[i].setBounds     (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 2*(knobWidth + knobPadding), knobWidth, knobWidth);
-		resonator_volumes[i].setBounds       (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 3*(knobWidth + knobPadding), knobWidth, knobWidth);
-		pluck_buttons[i]->setBounds      (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 4*(knobWidth + knobPadding), knobWidth, knobWidth);
+		resonator_octaves[i].setBounds     (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 1*(knobWidth + knobPadding), knobWidth, knobWidth);
+		resonator_decays[i].setBounds      (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 2*(knobWidth + knobPadding), knobWidth, knobWidth);
+		resonator_dampings[i].setBounds    (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 3*(knobWidth + knobPadding), knobWidth, knobWidth);
+		resonator_volumes[i].setBounds     (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 4*(knobWidth + knobPadding), knobWidth, knobWidth);
+		pluck_buttons[i]->setBounds        (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 5*(knobWidth + knobPadding), knobWidth, knobWidth);
 	}
-	input_volume_slider.setBounds  (350, 500, 100, 100);
-	wet_slider.setBounds       (500, 500, 100, 100);
-    output_volume_slider.setBounds (650, 500, 100, 100);
+	input_volume_slider.setBounds  (350, 600, 100, 100);
+	wet_slider.setBounds       (500, 600, 100, 100);
+    output_volume_slider.setBounds (650, 600, 100, 100);
 }
 
 #if(_DEBUG)

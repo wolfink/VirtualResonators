@@ -62,6 +62,7 @@ private:
     std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> octave_attachments;
     std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> decay_attachments;
     std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> volume_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> damping_attachments;
 
     uptr<AudioProcessorValueTreeState::SliderAttachment> input_attachment;
     uptr<AudioProcessorValueTreeState::SliderAttachment> wet_attachment;
@@ -71,6 +72,7 @@ private:
     Slider            resonator_octaves    [NUM_RESONATORS];
     Slider            resonator_decays     [NUM_RESONATORS];
     Slider            resonator_volumes    [NUM_RESONATORS];
+    Slider            resonator_dampings   [NUM_RESONATORS];
     uptr<ShapeButton> pluck_buttons        [NUM_RESONATORS];
     DecibelSlider     input_volume_slider;
     Slider            wet_slider;
@@ -80,6 +82,7 @@ private:
     Label resonator_note_value_label;
     Label resonator_octave_label;
     Label resonator_decay_label;
+    Label resonator_damping_label;
     Label volume_slider_label;
     Label input_volume_label;
     Label wet_label;

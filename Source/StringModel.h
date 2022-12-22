@@ -32,6 +32,7 @@ public:
 
     void setFrequency(double frequency);
     void setDecay(double decay);
+    void setDamping(double damping);
     void setVolume(double volume);
     void prepare(const juce::dsp::ProcessSpec& process_spec);
     void process(float* samples, int channel, size_t number_of_samples);

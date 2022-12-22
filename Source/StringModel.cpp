@@ -12,13 +12,22 @@
 #include "StringModel.h"
 
 //==============================================================================
-StringModel::StringModel(double sampleRate) : _sample_rate(sampleRate), _averaging_sample(0.0), _damping(0.99999)
+StringModel::StringModel(double sampleRate) : 
+    _sample_rate(sampleRate),
+    _averaging_sample(0.0),
+    _damping(0.99999),
+    _decay(0.5),
+    _volume(1)
 {
     _delay_line.setMaximumDelayInSamples(_sample_rate / 20.0);
 }
 
 StringModel::StringModel(const StringModel& string_model):
-_sample_rate(string_model._sample_rate), _averaging_sample(string_model._averaging_sample)
+_sample_rate(string_model._sample_rate),
+_averaging_sample(string_model._averaging_sample),
+_damping(string_model._damping),
+_decay(string_model._decay),
+_volume(string_model._volume)
 {
     _delay_line.setMaximumDelayInSamples(_sample_rate / 20.0);
 }
@@ -30,12 +39,18 @@ StringModel::~StringModel()
 void StringModel::setFrequency(double frequency)
 {
     _delay_line.setDelay(_sample_rate / frequency);
-    _damping = std::pow(10, -5 / frequency / STRING_MAX_DUR);
+    //_damping = std::pow(10, -5 / frequency / STRING_MAX_DUR);
 }
 
 void StringModel::setDecay(double decay)
 {
     _decay = decay;
+}
+
+void StringModel::setDamping(double damping)
+{
+    jassert(damping >= 0.0 && damping < 1.0);
+    _damping = damping;
 }
 
 void StringModel::setVolume(double volume)
