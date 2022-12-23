@@ -13,8 +13,8 @@
 #include <JuceHeader.h>
 #include "VirtualResonators.h"
 
-#define STRING_MAX_DUR 20.0
-#define GAMMA          0.2
+#define MIN_FREQ 10.0
+#define GAMMA    0.2
 
 //==============================================================================
 /*

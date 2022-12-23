@@ -19,7 +19,7 @@ StringModel::StringModel(double sampleRate) :
     _decay(0.5),
     _volume(1)
 {
-    _delay_line.setMaximumDelayInSamples(_sample_rate / 20.0);
+    _delay_line.setMaximumDelayInSamples(_sample_rate / MIN_FREQ);
 }
 
 StringModel::StringModel(const StringModel& string_model):
@@ -29,7 +29,7 @@ _damping(string_model._damping),
 _decay(string_model._decay),
 _volume(string_model._volume)
 {
-    _delay_line.setMaximumDelayInSamples(_sample_rate / 20.0);
+    _delay_line.setMaximumDelayInSamples(_sample_rate / MIN_FREQ);
 }
 
 StringModel::~StringModel()
@@ -61,7 +61,7 @@ void StringModel::setVolume(double volume)
 void StringModel::prepare(const juce::dsp::ProcessSpec& process_spec)
 {
     double frequency = _sample_rate / _delay_line.getDelay();
-    _delay_line.setMaximumDelayInSamples(process_spec.sampleRate / 20.0);
+    _delay_line.setMaximumDelayInSamples(process_spec.sampleRate / MIN_FREQ);
     _delay_line.setDelay(process_spec.sampleRate / frequency);
     _delay_line.prepare(process_spec);
     _sample_rate = process_spec.sampleRate;
