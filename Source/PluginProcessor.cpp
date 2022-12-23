@@ -18,7 +18,7 @@ AudioProcessorValueTreeState::ParameterLayout createParamLayout() {
 	const int         default_register_values[NUM_RESONATORS] = {   4,   4,   4,   4,   4,   4,   4,   5 };
 	const float          default_decay_values[NUM_RESONATORS] = { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
 	const float         default_volume_values[NUM_RESONATORS] = {  10,  10,  10,  10,  10,  10,  10,  10 };
-    const float        default_damping_values[NUM_RESONATORS] = { 2.0 };
+    const float        default_damping_values[NUM_RESONATORS] = { 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0 };
 	const float          default_input_volume                 = 0.0;
 	const float                   default_wet                 = 0.5;
 	const float         default_output_volume                 = 0.0;
@@ -214,7 +214,7 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
             float octave    = PARAM_VAL(REGISTER_ID(i));
             float note      = PARAM_VAL(NOTEVAL_ID(i));
             float decay     = PARAM_VAL(DECAY_ID(i)) / 200;
-            float damping   = std::pow(10, PARAM_VAL(DAMPING_ID(i)) - 5);
+            float damping   = 1 - std::pow(10, PARAM_VAL(DAMPING_ID(i)) - 5);
             float volume    = PARAM_VAL(VOLUME_ID(i)) / 10;
 			float frequency = 440.0 * std::pow(2, (octave - 4.0) +  (note - 9.0) / 12.0);
             synths[i].setFrequency(frequency);

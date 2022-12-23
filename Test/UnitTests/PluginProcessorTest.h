@@ -116,6 +116,9 @@ private:
 		}
 LEAVE_SIN_GEN:
 
+		float output_volume = Decibels::gainToDecibels(buffer.getRMSLevel(0, 0, block_size));
+		expectWithinAbsoluteError(output_volume, 0.0f, 3.0f, "Output volume not in acceptable range.");
+
 		analysis.performFrequencyOnlyForwardTransform(processed_sin_wave_data.data());
 
 		float max     = 0.0;

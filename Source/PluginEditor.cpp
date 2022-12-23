@@ -75,7 +75,7 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		decay_attachments.push_back  (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
 			audio_processor.parameters,    DECAY_ID(i),      resonator_decays[i]));
 		damping_attachments.push_back  (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
-			audio_processor.parameters,  DAMPING_ID(i),      resonator_decays[i]));
+			audio_processor.parameters,  DAMPING_ID(i),      resonator_dampings[i]));
 		volume_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
 			audio_processor.parameters,   VOLUME_ID(i),     resonator_volumes[i]));
 	}
