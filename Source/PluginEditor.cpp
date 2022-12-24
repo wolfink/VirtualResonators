@@ -82,12 +82,12 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		resonator_detunings[i].setTextBoxStyle          (Slider::NoTextBox, false, 90, 0);
 
 		resonator_decays[i].setSliderStyle              (Slider::RotaryHorizontalVerticalDrag);
-		resonator_decays[i].setRange                    (0., 100.0, 100.0 / 127.0);
+		resonator_decays[i].setRange                    (0., 100.0, 0.1);
 		resonator_decays[i].setTextBoxStyle             (Slider::NoTextBox, false, 90, 0);
 		resonator_decays[i].setPopupDisplayEnabled      (true, false, this);
 
 		resonator_dampings[i].setSliderStyle            (Slider::RotaryHorizontalVerticalDrag);
-		resonator_dampings[i].setRange                  (0.0, 4.0, 4.0 / 127.0);
+		resonator_dampings[i].setRange                  (0.0, 100.0, 0.1);
 		resonator_dampings[i].setTextBoxStyle           (Slider::NoTextBox, false, 90, 0);
 		resonator_dampings[i].setPopupDisplayEnabled    (true, false, this);
 
@@ -114,7 +114,7 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		resonator_toggles[i]->setToggleState             (true, NotificationType::dontSendNotification);
 
 		resonator_volumes[i].setSliderStyle             (Slider::RotaryHorizontalVerticalDrag);
-		resonator_volumes[i].setRange                   (0.0, 10.0, 10.0 / 127.0);
+		resonator_volumes[i].setRange                   (0.0, 10.0, 0.01);
 		resonator_volumes[i].setTextBoxStyle            (Slider::NoTextBox, false, 90, 0);
 		resonator_volumes[i].setPopupDisplayEnabled     (true, false, this);
 
@@ -142,7 +142,7 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
     input_volume_slider.setPopupDisplayEnabled     (true, false, this);
 
     wet_slider.setSliderStyle                      (Slider::RotaryHorizontalVerticalDrag);
-    wet_slider.setRange                            (0.0, 1.0, 1.0 / 127.0);
+    wet_slider.setRange                            (0.0, 100.0, 0.1);
     wet_slider.setTextBoxStyle                     (Slider::NoTextBox, false, 90, 0);
     wet_slider.setPopupDisplayEnabled              (true, false, this);
 

@@ -14,14 +14,14 @@ AudioProcessorValueTreeState::ParameterLayout createParamLayout() {
     AudioProcessorValueTreeState::ParameterLayout layout;
 
     // Important constant variables
-	const int            default_note_indexes[NUM_RESONATORS] = {   0,   2,   4,   5,   7,   9,  11,   0 };
-	const int         default_register_values[NUM_RESONATORS] = {   4,   4,   4,   4,   4,   4,   4,   5 };
-	const float         default_detune_values[NUM_RESONATORS] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-	const float          default_decay_values[NUM_RESONATORS] = { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
-	const float         default_volume_values[NUM_RESONATORS] = {  10,  10,  10,  10,  10,  10,  10,  10 };
-    const float        default_damping_values[NUM_RESONATORS] = { 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0 };
+	const int            default_note_indexes[NUM_RESONATORS] = {    0,    2,    4,    5,    7,    9,   11,    0 };
+	const int         default_register_values[NUM_RESONATORS] = {    4,    4,    4,    4,    4,    4,    4,    5 };
+	const float         default_detune_values[NUM_RESONATORS] = {  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0 };
+	const float          default_decay_values[NUM_RESONATORS] = { 50.0, 50.0, 50.0, 50.0, 50.0, 50.0, 50.0, 50.0 };
+	const float        default_damping_values[NUM_RESONATORS] = { 50.0, 50.0, 50.0, 50.0, 50.0, 50.0, 50.0, 50.0 };
+	const float         default_volume_values[NUM_RESONATORS] = {   10,   10,   10,   10,   10,   10,   10,   10 };
 	const float          default_input_volume                 = 0.0;
-	const float                   default_wet                 = 0.5;
+	const float                   default_wet                 = 50.0;
 	const float         default_output_volume                 = 0.0;
 	const StringArray                notevals                 = { "C", "C#/Db", "D", "D#/Eb",
                                                                   "E", "F", "F#/Gb", "G", 
@@ -39,20 +39,20 @@ AudioProcessorValueTreeState::ParameterLayout createParamLayout() {
             NormalisableRange<float>(-100.0, 100.0, 1.0), default_detune_values[i]));
         layout.add(std::make_unique<AudioParameterFloat>(
             DECAY_ID(i), DECAY_NAME(i),
-            NormalisableRange<float>(0.0, 100.0, 100.0 / 127.0), default_decay_values[i]));
+            NormalisableRange<float>(0.0, 100.0, 0.1), default_decay_values[i]));
         layout.add(std::make_unique<AudioParameterFloat>(
             DAMPING_ID(i), DAMPING_NAME(i),
-            NormalisableRange<float>(0.0, 4.0, 4.0 / 127.0), default_damping_values[i]));
+            NormalisableRange<float>(0.0, 100.0, 0.1), default_damping_values[i]));
         layout.add(std::make_unique<AudioParameterFloat>(
             VOLUME_ID(i), VOLUME_NAME(i),
-            NormalisableRange<float>(0.0, 10.0, 10.0 / 127.0), default_volume_values[i]));
+            NormalisableRange<float>(0.0, 10.0, 0.01), default_volume_values[i]));
         layout.add(std::make_unique<AudioParameterBool>(TOGGLE_ID(i), TOGGLE_NAME(i), true));
     }
 	layout.add(std::make_unique<AudioParameterFloat>(
         INPUT_ID, INPUT_NAME,
 		NormalisableRange<float>(-100.0, 12.0, 0.1), default_input_volume));
 	layout.add(std::make_unique<AudioParameterFloat>(WET_ID, WET_NAME,
-		NormalisableRange<float>(0.0, 1.0, 0.008), default_wet));
+		NormalisableRange<float>(0.0, 100.0, 0.1), default_wet));
 	layout.add(std::make_unique<AudioParameterFloat>(OUTPUT_ID, OUTPUT_NAME,
 		NormalisableRange<float>(-100.0, 12.0, 0.1), default_output_volume));
     return layout;
@@ -219,8 +219,8 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
             float octave    = PARAM_VAL(REGISTER_ID(i));
             float note      = PARAM_VAL(NOTEVAL_ID(i));
             float detune    = PARAM_VAL(DETUNE_ID(i));
-            float decay     = PARAM_VAL(DECAY_ID(i)) / 200;
-            float damping   = 1 - std::pow(10, PARAM_VAL(DAMPING_ID(i)) - 5);
+            float decay     = (100 - PARAM_VAL(DECAY_ID(i))) / 200;
+            float damping   = 1 - std::pow(10, PARAM_VAL(DAMPING_ID(i)) / 25.0 - 5);
             float volume    = PARAM_VAL(TOGGLE_ID(i)) * PARAM_VAL(VOLUME_ID(i)) / 10;
 			float frequency = 440.0 * std::pow(2, (octave - 4.0) +  (note - 9.0) / 12.0 + detune / 1200.0);
             synths[i].setFrequency(frequency);
@@ -230,7 +230,7 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         }
 
 
-        float  wet                 = PARAM_VAL(WET_ID);
+        float  wet                 = PARAM_VAL(WET_ID) / 100.0;
         float* output_channel_data = new float[buffer.getNumSamples()]{ 0 };
 #if(_DEBUG)
 		bufferDebugger->capture("Pre FX", channel_data, num_samples, -1.0, 1.0);
