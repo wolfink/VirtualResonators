@@ -58,29 +58,36 @@ private:
     jcf::FontAndColourDesigner* fontAndColourDesigner = nullptr;
 #endif
 
+    // Resonator Attachments
     std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> note_attachments;
     std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> octave_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> detune_attachments;
     std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> decay_attachments;
     std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> volume_attachments;
     std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> damping_attachments;
 
+    // Other Attachments
     uptr<AudioProcessorValueTreeState::SliderAttachment> input_attachment;
     uptr<AudioProcessorValueTreeState::SliderAttachment> wet_attachment;
     uptr<AudioProcessorValueTreeState::SliderAttachment> output_attachment;
 
-    NoteSlider        resonator_note_values[NUM_RESONATORS];
-    Slider            resonator_octaves    [NUM_RESONATORS];
-    Slider            resonator_decays     [NUM_RESONATORS];
-    Slider            resonator_volumes    [NUM_RESONATORS];
-    Slider            resonator_dampings   [NUM_RESONATORS];
-    uptr<ShapeButton> pluck_buttons        [NUM_RESONATORS];
+    // Sliders
+    NoteSlider        resonator_note_values [NUM_RESONATORS];
+    Slider            resonator_octaves     [NUM_RESONATORS];
+    Slider            resonator_decays      [NUM_RESONATORS];
+    Slider            resonator_volumes     [NUM_RESONATORS];
+    Slider            resonator_dampings    [NUM_RESONATORS];
+    Slider            resonator_detunings   [NUM_RESONATORS];
+    uptr<ShapeButton> pluck_buttons         [NUM_RESONATORS];
     DecibelSlider     input_volume_slider;
     Slider            wet_slider;
     DecibelSlider     output_volume_slider;
 
+    // Labels
     Label resonator_number_labels[NUM_RESONATORS];
     Label resonator_note_value_label;
     Label resonator_octave_label;
+    Label resonator_detune_label;
     Label resonator_decay_label;
     Label resonator_damping_label;
     Label volume_slider_label;

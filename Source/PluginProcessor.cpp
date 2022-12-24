@@ -16,6 +16,7 @@ AudioProcessorValueTreeState::ParameterLayout createParamLayout() {
     // Important constant variables
 	const int            default_note_indexes[NUM_RESONATORS] = {   0,   2,   4,   5,   7,   9,  11,   0 };
 	const int         default_register_values[NUM_RESONATORS] = {   4,   4,   4,   4,   4,   4,   4,   5 };
+	const float         default_detune_values[NUM_RESONATORS] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	const float          default_decay_values[NUM_RESONATORS] = { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
 	const float         default_volume_values[NUM_RESONATORS] = {  10,  10,  10,  10,  10,  10,  10,  10 };
     const float        default_damping_values[NUM_RESONATORS] = { 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0 };
@@ -33,6 +34,9 @@ AudioProcessorValueTreeState::ParameterLayout createParamLayout() {
         layout.add(std::make_unique<AudioParameterInt>(
             REGISTER_ID(i), REGISTER_NAME(i),
             0, 8, default_register_values[i]));
+        layout.add(std::make_unique<AudioParameterFloat>(
+            DETUNE_ID(i), DETUNE_NAME(i),
+            NormalisableRange<float>(-100.0, 100.0, 1.0), default_detune_values[i]));
         layout.add(std::make_unique<AudioParameterFloat>(
             DECAY_ID(i), DECAY_NAME(i),
             NormalisableRange<float>(0.0, 100.0, 100.0 / 127.0), default_decay_values[i]));
@@ -213,10 +217,11 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         for (int i = 0; i < NUM_RESONATORS; i++) {
             float octave    = PARAM_VAL(REGISTER_ID(i));
             float note      = PARAM_VAL(NOTEVAL_ID(i));
+            float detune    = PARAM_VAL(DETUNE_ID(i));
             float decay     = PARAM_VAL(DECAY_ID(i)) / 200;
             float damping   = 1 - std::pow(10, PARAM_VAL(DAMPING_ID(i)) - 5);
             float volume    = PARAM_VAL(VOLUME_ID(i)) / 10;
-			float frequency = 440.0 * std::pow(2, (octave - 4.0) +  (note - 9.0) / 12.0);
+			float frequency = 440.0 * std::pow(2, (octave - 4.0) +  (note - 9.0) / 12.0 + detune / 1200.0);
             synths[i].setFrequency(frequency);
             synths[i].setDecay(decay);
             synths[i].setDamping(damping);

@@ -19,6 +19,8 @@
 #define  NOTEVAL_NAME(index) "Note->Resonator "     + std::to_string(index)
 #define   REGISTER_ID(index) "note register "       + std::to_string(index)
 #define REGISTER_NAME(index) "Register->Resonator " + std::to_string(index)
+#define     DETUNE_ID(index) "note detune "         + std::to_string(index)
+#define   DETUNE_NAME(index) "Detune->Resonator"    + std::to_string(index)
 #define      DECAY_ID(index) "decay "               + std::to_string(index)
 #define    DECAY_NAME(index) "Decay->Resonator "    + std::to_string(index)
 #define    DAMPING_ID(index) "damping "             + std::to_string(index)
