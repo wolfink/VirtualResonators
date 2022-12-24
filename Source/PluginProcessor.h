@@ -27,6 +27,8 @@
 #define  DAMPING_NAME(index) "Damping->Resonator"   + std::to_string(index)
 #define     VOLUME_ID(index) "resonator volume "    + std::to_string(index)
 #define   VOLUME_NAME(index) "Volume->Resonator "   + std::to_string(index)
+#define     TOGGLE_ID(index) "resonator toggle "    + std::to_string(index)
+#define   TOGGLE_NAME(index) "On/Off->Resonator "   + std::to_string(index)
 #define      INPUT_ID        "input volume"
 #define    INPUT_NAME        "Input"
 #define        WET_ID        "wet"

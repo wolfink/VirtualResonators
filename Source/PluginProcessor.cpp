@@ -46,6 +46,7 @@ AudioProcessorValueTreeState::ParameterLayout createParamLayout() {
         layout.add(std::make_unique<AudioParameterFloat>(
             VOLUME_ID(i), VOLUME_NAME(i),
             NormalisableRange<float>(0.0, 10.0, 10.0 / 127.0), default_volume_values[i]));
+        layout.add(std::make_unique<AudioParameterBool>(TOGGLE_ID(i), TOGGLE_NAME(i), true));
     }
 	layout.add(std::make_unique<AudioParameterFloat>(
         INPUT_ID, INPUT_NAME,
@@ -220,7 +221,7 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
             float detune    = PARAM_VAL(DETUNE_ID(i));
             float decay     = PARAM_VAL(DECAY_ID(i)) / 200;
             float damping   = 1 - std::pow(10, PARAM_VAL(DAMPING_ID(i)) - 5);
-            float volume    = PARAM_VAL(VOLUME_ID(i)) / 10;
+            float volume    = PARAM_VAL(TOGGLE_ID(i)) * PARAM_VAL(VOLUME_ID(i)) / 10;
 			float frequency = 440.0 * std::pow(2, (octave - 4.0) +  (note - 9.0) / 12.0 + detune / 1200.0);
             synths[i].setFrequency(frequency);
             synths[i].setDecay(decay);
