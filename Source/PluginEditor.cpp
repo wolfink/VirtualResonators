@@ -65,16 +65,14 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
     // Set parameters for resonator components
     for (int i = 0; i < NUM_RESONATORS; i++) {
 
-		resonator_note_values[i].setPopupDisplayEnabled (true, false, this);
-		resonator_note_values[i].setTextBoxStyle        (Slider::NoTextBox, false, 90, 0);
+		for (int j = 0; j < notevals.size(); j++)
+			resonator_note_values[i].addItem(notevals[j], j + 1);
 
 		resonator_number_labels[i].setText              (std::to_string(i+1), NotificationType::dontSendNotification);
 		resonator_number_labels[i].attachToComponent    (&resonator_note_values[i], false);
 
-		resonator_octaves[i].setSliderStyle             (Slider::RotaryHorizontalVerticalDrag);
-		resonator_octaves[i].setRange                   (0.0, 8.0, 1.0);
-		resonator_octaves[i].setPopupDisplayEnabled     (true, false, this);
-		resonator_octaves[i].setTextBoxStyle            (Slider::NoTextBox, false, 90, 0);
+		for (int j = 0; j < 9; j++)
+			resonator_octaves[i].addItem(std::to_string(j), j + 1);
 
 		resonator_detunings[i].setSliderStyle           (Slider::RotaryHorizontalVerticalDrag);
 		resonator_detunings[i].setRange                 (-100.0, 100.0, 1.0);
@@ -152,9 +150,9 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 
 	// Attach components to audio processer state tree
 	for (size_t i = 0; i < NUM_RESONATORS; i++) {
-		note_attachments.push_back   (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+		note_attachments.push_back   (std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(
 			audio_processor.parameters,  NOTEVAL_ID(i), resonator_note_values[i]));
-		octave_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+		octave_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(
 			audio_processor.parameters, REGISTER_ID(i),     resonator_octaves[i]));
 		detune_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
 			audio_processor.parameters, DETUNE_ID(i),     resonator_detunings[i]));

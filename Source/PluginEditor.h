@@ -58,23 +58,10 @@ private:
     jcf::FontAndColourDesigner* fontAndColourDesigner = nullptr;
 #endif
 
-    // Resonator Attachments
-    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> note_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> octave_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> detune_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> decay_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> damping_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>> volume_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::ButtonAttachment>> toggle_attachments;
-
-    // Other Attachments
-    uptr<AudioProcessorValueTreeState::SliderAttachment> input_attachment;
-    uptr<AudioProcessorValueTreeState::SliderAttachment> wet_attachment;
-    uptr<AudioProcessorValueTreeState::SliderAttachment> output_attachment;
 
     // Sliders
-    NoteSlider        resonator_note_values [NUM_RESONATORS];
-    Slider            resonator_octaves     [NUM_RESONATORS];
+    ComboBox          resonator_note_values [NUM_RESONATORS];
+    ComboBox          resonator_octaves     [NUM_RESONATORS];
     Slider            resonator_decays      [NUM_RESONATORS];
     Slider            resonator_volumes     [NUM_RESONATORS];
     Slider            resonator_dampings    [NUM_RESONATORS];
@@ -84,6 +71,18 @@ private:
     DecibelSlider     input_volume_slider;
     Slider            wet_slider;
     DecibelSlider     output_volume_slider;
+
+    // Paramter Attachments
+    std::vector<uptr<AudioProcessorValueTreeState::ComboBoxAttachment>> note_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::ComboBoxAttachment>> octave_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   detune_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   decay_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   damping_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   volume_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::ButtonAttachment>>   toggle_attachments;
+    uptr<AudioProcessorValueTreeState::SliderAttachment> input_attachment;
+    uptr<AudioProcessorValueTreeState::SliderAttachment> wet_attachment;
+    uptr<AudioProcessorValueTreeState::SliderAttachment> output_attachment;
 
     // Labels
     Label resonator_number_labels[NUM_RESONATORS];

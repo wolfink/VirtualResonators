@@ -23,9 +23,7 @@ AudioProcessorValueTreeState::ParameterLayout createParamLayout() {
 	const float          default_input_volume                 = 0.0;
 	const float                   default_wet                 = 50.0;
 	const float         default_output_volume                 = 0.0;
-	const StringArray                notevals                 = { "C", "C#/Db", "D", "D#/Eb",
-                                                                  "E", "F", "F#/Gb", "G", 
-                                                                  "G#/Ab", "A", "A#/Gb", "B" };
+
     for (size_t i = 0; i < NUM_RESONATORS; i++)
     {
         layout.add(std::make_unique<AudioParameterChoice>(

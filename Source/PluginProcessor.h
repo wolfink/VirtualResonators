@@ -36,6 +36,10 @@
 #define     OUTPUT_ID        "output"
 #define   OUTPUT_NAME        "Output"
 
+const StringArray notevals = { "C", "C#/Db", "D", "D#/Eb",
+							   "E", "F", "F#/Gb", "G",
+							   "G#/Ab", "A", "A#/Gb", "B" };
+
 #define PARAM_VAL(name) *parameters.getRawParameterValue(name)
 
 //==============================================================================
