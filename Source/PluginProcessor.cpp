@@ -63,7 +63,7 @@ ResonatorProjectAudioProcessor::ResonatorProjectAudioProcessor() :
 #if ! JucePlugin_IsSynth
         .withInput("Input", juce::AudioChannelSet::mono(), true)
 #endif
-        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
+        .withOutput("Output", juce::AudioChannelSet::mono(), true)
 #endif
     ),
 #endif

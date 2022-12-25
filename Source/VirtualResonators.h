@@ -12,6 +12,3 @@
 
 template<typename T>
 using uptr = std::unique_ptr<T>;
-
-#define NUM_IN_CHAN  1
-#define NUM_OUT_CHAN 2
