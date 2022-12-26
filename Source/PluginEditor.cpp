@@ -97,13 +97,13 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		pluck_buttons[i]->onClick = [this, i] { audio_processor.pluckResonator(i); };
 
 		resonator_toggles[i] = std::make_unique<ShapeButton>(String("Pulse"), 
-			Colour( 90,  90,  90), 
-			Colour(128, 128, 128), 
-			Colour(128, 128, 128));
+			Colour(30, 0, 0), 
+			Colour(30, 0, 0), 
+			Colour(30, 0, 0));
 		resonator_toggles[i]->setOnColours(
 			Colour(128, 0, 0),
-			Colour(190, 0, 0),
-			Colour(90, 90, 90)
+			Colour(128, 0, 0),
+			Colour(128, 0, 0)
 		);
 		resonator_toggles[i]->shouldUseOnColours         (true);
 		resonator_toggles[i]->setShape                   (path, false, false, false);
@@ -127,21 +127,22 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
     }
 
     // Set parameters for volume and mix sliders
-    output_volume_slider.setSliderStyle            (Slider::RotaryHorizontalVerticalDrag);
+    output_volume_slider.setSliderStyle            (Slider::LinearVertical);
     output_volume_slider.setRange                  (-100.0, 12.0, 0.1);
     output_volume_slider.setSkewFactorFromMidPoint (0.0);
     output_volume_slider.setTextBoxStyle           (Slider::NoTextBox, false, 90, 0);
     output_volume_slider.setPopupDisplayEnabled    (true, false, this);
 
-    input_volume_slider.setSliderStyle             (Slider::RotaryHorizontalVerticalDrag);
+    input_volume_slider.setSliderStyle             (Slider::LinearVertical);
     input_volume_slider.setRange                   (-100.0, 12.0, 0.1);
     input_volume_slider.setSkewFactorFromMidPoint  (0.0);
     input_volume_slider.setTextBoxStyle            (Slider::NoTextBox, false, 90, 0);
     input_volume_slider.setPopupDisplayEnabled     (true, false, this);
 
-    wet_slider.setSliderStyle                      (Slider::RotaryHorizontalVerticalDrag);
+    wet_slider.setSliderStyle                      (Slider::LinearVertical);
     wet_slider.setRange                            (0.0, 100.0, 0.1);
     wet_slider.setTextBoxStyle                     (Slider::NoTextBox, false, 90, 0);
+	wet_slider.setTextValueSuffix                  ("%");
     wet_slider.setPopupDisplayEnabled              (true, false, this);
 
     addAndMakeVisible(&output_volume_slider);
@@ -192,10 +193,10 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 	volume_slider_label.setText                  ("Volume", NotificationType::dontSendNotification);
 	volume_slider_label.attachToComponent        (&resonator_volumes[0], true);
 
-    output_volume_label.setText                  ("Output", NotificationType::dontSendNotification);
+    output_volume_label.setText                  ("Out", NotificationType::dontSendNotification);
     output_volume_label.attachToComponent        (&output_volume_slider, false);
 
-    input_volume_label.setText                   ("Input", NotificationType::dontSendNotification);
+    input_volume_label.setText                   ("In", NotificationType::dontSendNotification);
     input_volume_label.attachToComponent         (&input_volume_slider, false);
 
     wet_label.setText                            ("Wet", NotificationType::dontSendNotification);
@@ -204,9 +205,9 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 #if(_DEBUG)
-	setSize(850, 850);
+	setSize(1090, 780);
 #else
-    setSize (800, 850);
+    setSize (1040, 780);
 #endif
 }
 
@@ -232,33 +233,77 @@ void ResonatorProjectAudioProcessorEditor::paint (juce::Graphics& g)
 
 void ResonatorProjectAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+	auto area = getLocalBounds();
+
+	area.removeFromTop(80);
+	area.removeFromBottom(40);
+
 #if(_DEBUG)
-	buffer_view->setBounds(800, 0, 50, 50);
-	component_view->setBounds(800, 50, 50, 50);
-	valueTree_view->setBounds(800, 100, 50, 50);
-	fontAndColour_view->setBounds(800, 150, 50, 50);
-    int knobWidth = (getWidth() - 200) / NUM_RESONATORS * 0.8;
-    int knobPadding = knobWidth * 0.25;
-#else
-    int knobWidth = (getWidth() - 150) / NUM_RESONATORS * 0.8;
-    int knobPadding = knobWidth * 0.25;
+	FlexBox debug_sidebar;
+	auto debug_width = 50;
+
+	debug_sidebar.flexWrap = FlexBox::Wrap::wrap;
+	debug_sidebar.flexDirection = FlexBox::Direction::column;
+
+	debug_sidebar.items.add(FlexItem(*buffer_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
+	debug_sidebar.items.add(FlexItem(*component_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
+	debug_sidebar.items.add(FlexItem(*valueTree_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
+	debug_sidebar.items.add(FlexItem(*fontAndColour_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
+	debug_sidebar.performLayout(area.removeFromRight(debug_width));
 #endif
+
+	auto section_width = 80;
+	auto section_pad   = 10;
+	auto combo_height  = 20;
+
+	input_volume_slider.setBounds(area.removeFromLeft(section_width));
+	output_volume_slider.setBounds(area.removeFromRight(section_width));
+	wet_slider.setBounds(area.removeFromRight(section_width));
+
+	area.removeFromLeft(section_width); // space for resonator component labels
+	FlexBox resonator_sections[NUM_RESONATORS];
 	for (int i = 0; i < NUM_RESONATORS; i++) {
-		//resonatorFrequency[i].setBounds(100 + knobPadding*(i + 1) + knobWidth*i, 50, knobWidth, knobWidth);
-		resonator_note_values[i].setBounds (100 + knobPadding*(i + 1) + knobWidth*i, 50                              , knobWidth, knobWidth);
-		resonator_octaves[i].setBounds     (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 1*(knobWidth + knobPadding), knobWidth, knobWidth);
-		resonator_detunings[i].setBounds   (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 2*(knobWidth + knobPadding), knobWidth, knobWidth);
-		resonator_decays[i].setBounds      (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 3*(knobWidth + knobPadding), knobWidth, knobWidth);
-		resonator_dampings[i].setBounds    (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 4*(knobWidth + knobPadding), knobWidth, knobWidth);
-		resonator_volumes[i].setBounds     (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 5*(knobWidth + knobPadding), knobWidth, knobWidth);
-		pluck_buttons[i]->setBounds        (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 6*(knobWidth + knobPadding), knobWidth, knobWidth);
-		resonator_toggles[i]->setBounds     (100 + knobPadding*(i + 1) + knobWidth*i, 50 + 7*(knobWidth + knobPadding), knobWidth, knobWidth);
+		resonator_sections[i].flexWrap = FlexBox::Wrap::wrap;
+		resonator_sections[i].flexDirection = FlexBox::Direction::column;
+		resonator_sections[i].justifyContent = FlexBox::JustifyContent::spaceBetween;
+		resonator_sections[i].alignContent = FlexBox::AlignContent::center;
+
+		resonator_sections[i].items.add(FlexItem(resonator_note_values[i])
+			.withMinWidth(section_width)
+			.withMaxHeight(combo_height)
+			.withFlex(1));
+		resonator_sections[i].items.add(FlexItem(resonator_octaves[i])
+			.withMinWidth(section_width)
+			.withMaxHeight(combo_height)
+			.withFlex(1));
+		resonator_sections[i].items.add(FlexItem(resonator_detunings[i])
+			.withMinWidth(section_width)
+			.withMaxHeight(section_width)
+			.withFlex(1));
+		resonator_sections[i].items.add(FlexItem(resonator_decays[i])
+			.withMinWidth(section_width)
+			.withMaxHeight(section_width)
+			.withFlex(1));
+		resonator_sections[i].items.add(FlexItem(resonator_dampings[i])
+			.withMinWidth(section_width)
+			.withMaxHeight(section_width)
+			.withFlex(1));
+		resonator_sections[i].items.add(FlexItem(resonator_volumes[i])
+			.withMinWidth(section_width)
+			.withMaxHeight(section_width)
+			.withFlex(1));
+		resonator_sections[i].items.add(FlexItem(*pluck_buttons[i])
+			.withMinWidth(section_width)
+			.withMaxHeight(section_width)
+			.withFlex(1));
+		resonator_sections[i].items.add(FlexItem(*resonator_toggles[i])
+			.withMinWidth(section_width)
+			.withMaxHeight(section_width)
+			.withFlex(1));
+		resonator_sections[i].performLayout(area.removeFromLeft(section_width));
+
+		if (i < NUM_RESONATORS - 1) area.removeFromLeft(section_pad);
 	}
-	input_volume_slider.setBounds  (350, 700, 100, 100);
-	wet_slider.setBounds           (500, 700, 100, 100);
-    output_volume_slider.setBounds (650, 700, 100, 100);
 }
 
 #if(_DEBUG)
