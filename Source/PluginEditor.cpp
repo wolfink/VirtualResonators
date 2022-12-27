@@ -227,8 +227,8 @@ void ResonatorProjectAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
     g.setColour (Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText("Resonators", 0, 0, getWidth(), 30, juce::Justification::centred, 1);
+    g.setFont (25.0f);
+    g.drawFittedText("Virtual Resonators", 0, 0, getWidth(), 40, juce::Justification::centred, 1);
 }
 
 void ResonatorProjectAudioProcessorEditor::resized()
