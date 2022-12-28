@@ -45,6 +45,9 @@ const StringArray notevals = { "C", "C#/Db", "D", "D#/Eb",
 //==============================================================================
 /**
 */
+
+class DCBlocker;
+
 class ResonatorProjectAudioProcessor : public AudioProcessor
 {
 public:
@@ -102,11 +105,23 @@ private:
 #endif
 
     std::vector<StringModel> synths;
+    std::vector<DCBlocker>   dc_blockers;
 
-    // For DC Blocking
-    float _xm1;
-    float _ym1;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessor)
+};
+
+class DCBlocker {
+    float prev_x;
+    float prev_y;
+public:
+    DCBlocker(): prev_x(0.0f), prev_y(0.0f) {}
+    float process_sample(float sample)
+    {
+        float retval = sample - prev_x + 0.995 * prev_y;
+        prev_x = sample;
+        prev_y = retval;
+        return retval;
+    }
 };

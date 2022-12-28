@@ -68,9 +68,7 @@ ResonatorProjectAudioProcessor::ResonatorProjectAudioProcessor() :
     ),
 #endif
     synths(std::vector<StringModel>(NUM_RESONATORS, StringModel(44100))),
-    parameters(*this, nullptr, "PARAMS", createParamLayout()),
-    _xm1(0.0),
-    _ym1(0.0)
+    parameters(*this, nullptr, "PARAMS", createParamLayout())
 {
 }
 
@@ -143,9 +141,12 @@ void ResonatorProjectAudioProcessor::changeProgramName (int index, const juce::S
 //==============================================================================
 void ResonatorProjectAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    for (int i = 0; i < NUM_RESONATORS; i++) {
-        synths[i].setFrequency(440.0);
-        synths[i].prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32)samplesPerBlock, (juce::uint32)getNumOutputChannels() }));
+    for (int index = 0; index < NUM_RESONATORS; index++) {
+        synths[index].setFrequency(440.0);
+        synths[index].prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32)samplesPerBlock, (juce::uint32)getNumOutputChannels() }));
+    }
+    for (int channel = 0; channel < getTotalNumInputChannels(); channel++) {
+        dc_blockers.push_back(DCBlocker());
     }
 }
 
@@ -210,18 +211,18 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 		buffer.applyGain(input_volume);
 
         // Update synthesizer parameters, and add noise, before processing audio
-        for (int i = 0; i < NUM_RESONATORS; i++) {
-            float octave    = PARAM_VAL(REGISTER_ID(i));
-            float note      = PARAM_VAL(NOTEVAL_ID(i));
-            float detune    = PARAM_VAL(DETUNE_ID(i));
-            float decay     = (100 - PARAM_VAL(DECAY_ID(i))) / 200;
-            float damping   = 1 - std::pow(10, PARAM_VAL(DAMPING_ID(i)) / 25.0 - 5);
-            float volume    = PARAM_VAL(TOGGLE_ID(i)) * PARAM_VAL(VOLUME_ID(i)) / 10;
+        for (int index = 0; index < NUM_RESONATORS; index++) {
+            float octave    = PARAM_VAL(REGISTER_ID(index));
+            float note      = PARAM_VAL(NOTEVAL_ID(index));
+            float detune    = PARAM_VAL(DETUNE_ID(index));
+            float decay     = (100 - PARAM_VAL(DECAY_ID(index))) / 200;
+            float damping   = 1 - std::pow(10, PARAM_VAL(DAMPING_ID(index)) / 25.0 - 5);
+            float volume    = PARAM_VAL(TOGGLE_ID(index)) * PARAM_VAL(VOLUME_ID(index)) / 10;
 			float frequency = 440.0 * std::pow(2, (octave - 4.0) +  (note - 9.0) / 12.0 + detune / 1200.0);
-            synths[i].setFrequency(frequency);
-            synths[i].setDecay(decay);
-            synths[i].setDamping(damping);
-            synths[i].setVolume(volume);
+            synths[index].setFrequency(frequency);
+            synths[index].setDecay(decay);
+            synths[index].setDamping(damping);
+            synths[index].setVolume(volume);
         }
 
 
@@ -230,26 +231,24 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 #if(_DEBUG)
 		bufferDebugger->capture("Pre FX", channel_data, num_samples, -1.0, 1.0);
 #endif
-        for (int i = 0; i < NUM_RESONATORS; i++) {
+        for (int index = 0; index < NUM_RESONATORS; index++) {
 			AudioBuffer<float> buffer_copy;
             buffer_copy.makeCopyOf(buffer);
             auto channel_data_copy = buffer_copy.getWritePointer(channel);
 
-			synths[i].process(channel_data_copy, channel, num_samples);
+			synths[index].process(channel_data_copy, channel, num_samples);
 
-            for (int j = 0; j < num_samples; j++)
-                output_channel_data[j] += channel_data_copy[j] / NUM_RESONATORS;
+            for (int i = 0; i < num_samples; i++)
+                output_channel_data[i] += channel_data_copy[i] / NUM_RESONATORS;
 #if(_DEBUG)
-			bufferDebugger->capture("Post FX #" + std::to_string(i), output_channel_data, num_samples, -1.0, 1.0);
+			bufferDebugger->capture("Post FX #" + std::to_string(index), output_channel_data, num_samples, -1.0, 1.0);
 #endif
         }
 
         // Copy proccessed data into buffer through a DC blocking filter to prevent value drift
-        for (int j = 0; j < num_samples; j++) {
-            float x = output_channel_data[j];
-            float y = x - _xm1 + 0.995 * _ym1;
-            channel_data[j] = channel_data[j] * (1 - wet)  + y * wet; // Wet signal + Dry signal
-            _xm1 = x; _ym1 = y;
+        for (int sample = 0; sample < num_samples; sample++) {
+            float y = dc_blockers[channel].process_sample(output_channel_data[sample]);
+            channel_data[sample] = channel_data[sample] * (1 - wet)  + y * wet; // Wet signal + Dry signal
         }
 #if(_DEBUG)
         bufferDebugger->capture("channelData", channel_data, num_samples, -1.0, 1.0);
