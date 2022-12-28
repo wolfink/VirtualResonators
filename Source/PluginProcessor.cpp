@@ -317,8 +317,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 //==============================================================================
 void ResonatorProjectAudioProcessor::pluckResonator(int index)
 {
-    for(int channel = 0; channel < getTotalNumInputChannels(); channel++)
-		synths[index].pluck(channel);
+	synths[index].pluck();
 }
 
 #if(_DEBUG)

@@ -12,3 +12,5 @@
 
 template<typename T>
 using uptr = std::unique_ptr<T>;
+
+#define LOOP(num) for(int _ = 0; _ < num; _++)

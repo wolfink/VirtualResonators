@@ -63,32 +63,35 @@ void StringModel::prepare(const juce::dsp::ProcessSpec& process_spec)
     _delay_line.setDelay(process_spec.sampleRate / frequency);
     _delay_line.prepare(process_spec);
     _sample_rate = process_spec.sampleRate;
+    _num_channels = process_spec.numChannels;
     _averaging_sample.resize(process_spec.numChannels);
 }
 
-void StringModel::pluck(int channel)
+void StringModel::pluck()
 {
-    size_t num_samples = _delay_line.getDelay();
+    auto num_channels = _delay_line;
+    auto num_samples = _delay_line.getDelay();
 	juce::Random random;
 	random.setSeedRandomly();
     clear();
 
-	for (int j = 0; j < num_samples; j++) {
-		_delay_line.pushSample(channel, random.nextFloat() * 2.0 - 1.0);
-		_delay_line.popSample(channel);
+	LOOP(num_samples) {
+        auto sample = random.nextFloat() * 2.0 - 1.0;
+		for (int channel = 0; channel < _num_channels; channel++) {
+			_delay_line.pushSample(channel, sample);
+			_delay_line.popSample(channel);
+		}
 	}
-
-	_delay_line.popSample(channel);
 }
 
 void StringModel::process(float* samples, int channel, size_t numberOfSamples)
 {
-    for (int i = 0; i < numberOfSamples; i++)
+    for (int sample = 0; sample < numberOfSamples; sample++)
     {
         float delayedSample = _delay_line.popSample(channel);
-        samples[i] += _damping * (_decay * _averaging_sample[channel] + (1 - _decay) * delayedSample);
+        samples[sample] += _damping * (_decay * _averaging_sample[channel] + (1 - _decay) * delayedSample);
         _averaging_sample[channel] = delayedSample;
-        _delay_line.pushSample(channel, samples[i]);
-        samples[i] *= _volume * GAMMA;
+        _delay_line.pushSample(channel, samples[sample]);
+        samples[sample] *= _volume * GAMMA;
     }
 }

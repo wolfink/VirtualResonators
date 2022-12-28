@@ -24,6 +24,13 @@
 */
 class StringModel
 {
+    dsp::DelayLine<float, dsp::DelayLineInterpolationTypes::Thiran> _delay_line;
+    double _sample_rate;
+    int    _num_channels;
+    double _decay;
+    double _damping;
+    double _volume;
+    std::vector<float> _averaging_sample;
 public:
     StringModel(double sample_rate);
     StringModel(const StringModel& string_model);
@@ -35,17 +42,10 @@ public:
     void setVolume(double volume);
     void prepare(const juce::dsp::ProcessSpec& process_spec);
     void process(float* samples, int channel, size_t number_of_samples);
-    void pluck(int channel);
+    void pluck();
     void clear()
     {
       _delay_line.reset();
     }
-private:
-    dsp::DelayLine<float, dsp::DelayLineInterpolationTypes::Thiran> _delay_line;
-    double _sample_rate;
-    double _decay;
-    double _damping;
-    double _volume;
-    std::vector<float> _averaging_sample;
     JUCE_LEAK_DETECTOR (StringModel)
 };
