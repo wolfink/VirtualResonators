@@ -59,7 +59,7 @@ private:
 #endif
 
 
-    // Sliders
+    // Resonator components
     ComboBox          resonator_note_values [NUM_RESONATORS];
     ComboBox          resonator_octaves     [NUM_RESONATORS];
     Slider            resonator_decays      [NUM_RESONATORS];
@@ -68,9 +68,14 @@ private:
     Slider            resonator_detunings   [NUM_RESONATORS];
     uptr<ShapeButton> pluck_buttons         [NUM_RESONATORS];
     uptr<ShapeButton> resonator_toggles     [NUM_RESONATORS];
+
+    // I/O components
     DecibelSlider     input_volume_slider;
     Slider            wet_slider;
     DecibelSlider     output_volume_slider;
+
+    // Footer components
+    ComboBox mono_stereo_select;
 
     // Paramter Attachments
     std::vector<uptr<AudioProcessorValueTreeState::ComboBoxAttachment>> note_attachments;

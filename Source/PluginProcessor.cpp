@@ -61,14 +61,15 @@ ResonatorProjectAudioProcessor::ResonatorProjectAudioProcessor() :
     AudioProcessor(BusesProperties()
 #if ! JucePlugin_IsMidiEffect
 #if ! JucePlugin_IsSynth
-        .withInput("Input", juce::AudioChannelSet::mono(), true)
+        .withInput("Input", juce::AudioChannelSet::stereo(), true)
 #endif
-        .withOutput("Output", juce::AudioChannelSet::mono(), true)
+        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
     ),
 #endif
     synths(std::vector<StringModel>(NUM_RESONATORS, StringModel(44100))),
-    parameters(*this, nullptr, "PARAMS", createParamLayout())
+    parameters(*this, nullptr, "PARAMS", createParamLayout()),
+    mono(false)
 {
 }
 
@@ -267,6 +268,12 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 		output_volume       = Decibels::decibelsToGain(output_volume);
 
 		buffer.applyGain(output_volume);
+    }
+
+    if (mono) {
+        buffer.addFrom (0, 0, buffer, 1, 0, num_samples);
+        buffer.copyFrom(1, 0, buffer, 0, 0, num_samples);
+        buffer.applyGain(0.5f);
     }
 }
 

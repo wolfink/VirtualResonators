@@ -50,7 +50,15 @@ class DCBlocker;
 
 class ResonatorProjectAudioProcessor : public AudioProcessor
 {
+    //==============================================================================
+    std::vector<StringModel> synths;
+    std::vector<DCBlocker>   dc_blockers;
+
 public:
+
+    AudioProcessorValueTreeState parameters;
+    bool mono;
+
     //==============================================================================
     ResonatorProjectAudioProcessor();
     ~ResonatorProjectAudioProcessor() override;
@@ -89,24 +97,18 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
     //==============================================================================
+    void pluckResonator(int index);
+
 #if(_DEBUG)
     void toggleBufferDebugger();
 #endif
-    void pluckResonator(int index);
-
-    AudioProcessorValueTreeState parameters;
     
 private:
     //==============================================================================
-
 #if(_DEBUG)
     jcf::BufferDebugger* bufferDebugger;
     bool bufferDebuggerOn = false;
 #endif
-
-    std::vector<StringModel> synths;
-    std::vector<DCBlocker>   dc_blockers;
-
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessor)

@@ -144,9 +144,21 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 	wet_slider.setTextValueSuffix                  ("%");
     wet_slider.setPopupDisplayEnabled              (true, false, this);
 
+	mono_stereo_select.addItem("Mono"  , 1);
+	mono_stereo_select.addItem("Stereo", 2);
+	mono_stereo_select.setSelectedId(2);
+	mono_stereo_select.onChange = [this] {
+		switch (mono_stereo_select.getSelectedId()) {
+			case 1:  audio_processor.mono = true;  break;
+			case 2:  audio_processor.mono = false; break;
+			default: break;
+		}
+	};
+
     addAndMakeVisible(&output_volume_slider);
     addAndMakeVisible(&input_volume_slider);
     addAndMakeVisible(&wet_slider);
+	addAndMakeVisible(&mono_stereo_select);
 
 	// Attach components to audio processer state tree
 	for (size_t i = 0; i < NUM_RESONATORS; i++) {
@@ -234,8 +246,17 @@ void ResonatorProjectAudioProcessorEditor::resized()
 {
 	auto area = getLocalBounds();
 
-	area.removeFromTop(80);
-	area.removeFromBottom(40);
+	auto header_height = 80;
+	auto footer_height = 80;
+	auto section_width = 80;
+	auto section_pad   = 10;
+	auto combo_height  = 20;
+
+	area.removeFromTop(header_height);
+	area.removeFromBottom(footer_height);
+
+	mono_stereo_select.setBounds(getWidth() - section_width, getHeight() - 60, section_width, 40);
+
 
 #if(_DEBUG)
 	FlexBox debug_sidebar;
@@ -249,11 +270,9 @@ void ResonatorProjectAudioProcessorEditor::resized()
 	debug_sidebar.items.add(FlexItem(*valueTree_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
 	debug_sidebar.items.add(FlexItem(*fontAndColour_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
 	debug_sidebar.performLayout(area.removeFromRight(debug_width));
+	mono_stereo_select.setBounds(getWidth() - section_width - debug_width, getHeight() - 60, section_width, 40);
 #endif
 
-	auto section_width = 80;
-	auto section_pad   = 10;
-	auto combo_height  = 20;
 
 	input_volume_slider.setBounds(area.removeFromLeft(section_width));
 	output_volume_slider.setBounds(area.removeFromRight(section_width));
@@ -268,37 +287,29 @@ void ResonatorProjectAudioProcessorEditor::resized()
 		resonator_sections[i].alignContent = FlexBox::AlignContent::center;
 
 		resonator_sections[i].items.add(FlexItem(resonator_note_values[i])
-			.withMinWidth(section_width)
-			.withMaxHeight(combo_height)
-			.withFlex(1));
+			.withWidth(section_width)
+			.withHeight(combo_height));
 		resonator_sections[i].items.add(FlexItem(resonator_octaves[i])
-			.withMinWidth(section_width)
-			.withMaxHeight(combo_height)
-			.withFlex(1));
+			.withWidth(section_width)
+			.withHeight(combo_height));
 		resonator_sections[i].items.add(FlexItem(resonator_detunings[i])
-			.withMinWidth(section_width)
-			.withMaxHeight(section_width)
-			.withFlex(1));
+			.withWidth(section_width)
+			.withHeight(section_width));
 		resonator_sections[i].items.add(FlexItem(resonator_decays[i])
-			.withMinWidth(section_width)
-			.withMaxHeight(section_width)
-			.withFlex(1));
+			.withWidth(section_width)
+			.withHeight(section_width));
 		resonator_sections[i].items.add(FlexItem(resonator_dampings[i])
-			.withMinWidth(section_width)
-			.withMaxHeight(section_width)
-			.withFlex(1));
+			.withWidth(section_width)
+			.withHeight(section_width));
 		resonator_sections[i].items.add(FlexItem(resonator_volumes[i])
-			.withMinWidth(section_width)
-			.withMaxHeight(section_width)
-			.withFlex(1));
+			.withWidth(section_width)
+			.withHeight(section_width));
 		resonator_sections[i].items.add(FlexItem(*pluck_buttons[i])
-			.withMinWidth(section_width)
-			.withMaxHeight(section_width)
-			.withFlex(1));
+			.withWidth(section_width)
+			.withHeight(section_width));
 		resonator_sections[i].items.add(FlexItem(*resonator_toggles[i])
-			.withMinWidth(section_width)
-			.withMaxHeight(section_width)
-			.withFlex(1));
+			.withWidth(section_width)
+			.withHeight(section_width));
 		resonator_sections[i].performLayout(area.removeFromLeft(section_width));
 
 		if (i < NUM_RESONATORS - 1) area.removeFromLeft(section_pad);
