@@ -143,9 +143,6 @@ void ResonatorProjectAudioProcessor::changeProgramName (int index, const juce::S
 //==============================================================================
 void ResonatorProjectAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    _xm1 = 0.0;
-    _ym1 = 0.0;
-    //juce::ValueTree node;
     for (int i = 0; i < NUM_RESONATORS; i++) {
         synths[i].setFrequency(440.0);
         synths[i].prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32)samplesPerBlock, (juce::uint32)getNumOutputChannels() }));

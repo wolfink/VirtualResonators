@@ -27,7 +27,6 @@ class StringModel
 public:
     StringModel(double sample_rate);
     StringModel(const StringModel& string_model);
-    //StringModel(const juce::dsp::ProcessSpec& processSpec);
     ~StringModel();
 
     void setFrequency(double frequency);
@@ -43,12 +42,10 @@ public:
     }
 private:
     dsp::DelayLine<float, dsp::DelayLineInterpolationTypes::Thiran> _delay_line;
-    //juce::dsp::ProcessSpec processSpec;
     double _sample_rate;
     double _decay;
     double _damping;
     double _volume;
-    //double frequency;
     std::vector<float> _averaging_sample;
     JUCE_LEAK_DETECTOR (StringModel)
 };

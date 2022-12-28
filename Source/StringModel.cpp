@@ -8,7 +8,6 @@
   ==============================================================================
 */
 
-//#include <JuceHeader.h>
 #include "StringModel.h"
 
 //==============================================================================
@@ -39,7 +38,6 @@ StringModel::~StringModel()
 void StringModel::setFrequency(double frequency)
 {
     _delay_line.setDelay(_sample_rate / frequency);
-    //_damping = std::pow(10, -5 / frequency / STRING_MAX_DUR);
 }
 
 void StringModel::setDecay(double decay)

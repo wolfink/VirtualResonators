@@ -17,7 +17,6 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
     // Useful variables
 	juce::Path path;
 	path.addEllipse(50, 200, 50, 50);
-	//path.addRectangle(50, 200, 50, 50);
 
 #if(_DEBUG)
 	buffer_view = new juce::ShapeButton(
@@ -326,10 +325,5 @@ void ResonatorProjectAudioProcessorEditor::openValueTreeDebugger()
 
 void ResonatorProjectAudioProcessorEditor::toggleFontAndColourDesigner()
 {
-	/*
-    if (!fontAndColourDesignerOn) fontAndColourDesigner = new jcf::FontAndColourDesigner();
-    else delete fontAndColourDesigner;
-    fontAndColourDesignerOn = !fontAndColourDesignerOn;
-	*/
 }
 #endif
