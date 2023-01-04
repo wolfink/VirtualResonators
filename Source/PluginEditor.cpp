@@ -11,7 +11,7 @@
 
 //==============================================================================
 ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (ResonatorProjectAudioProcessor& p)
-    : AudioProcessorEditor (&p), audio_processor (p)
+    : AudioProcessorEditor (&p), _audioProcessor (p)
 {
 
     // Useful variables
@@ -19,199 +19,202 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 	path.addEllipse(50, 200, 50, 50);
 
 #if(_DEBUG)
-	buffer_view = new juce::ShapeButton(
+	_buffer_view = new juce::ShapeButton(
 				juce::String("Pulse"), 
 				juce::Colour(128, 0, 0), 
 				juce::Colour(150, 0, 0), 
 				juce::Colour(90, 0, 0)
 		);
-	component_view = new juce::ShapeButton(
+	_component_view = new juce::ShapeButton(
 				juce::String("Pulse"), 
 				juce::Colour(0, 128, 0), 
 				juce::Colour(0, 150, 0), 
 				juce::Colour(0, 90, 0)
 		);
-	valueTree_view = new juce::ShapeButton(
+	_valueTree_view = new juce::ShapeButton(
 				juce::String("Pulse"), 
 				juce::Colour(0, 0, 128), 
 				juce::Colour(0, 0, 150), 
 				juce::Colour(0, 0, 90)
 		);
-	fontAndColour_view = new juce::ShapeButton(
+	_fontAndColour_view = new juce::ShapeButton(
 				juce::String("Pulse"), 
 				juce::Colour(128, 0, 128), 
 				juce::Colour(150, 0, 150), 
 				juce::Colour(90, 0, 90)
 		);
 
-	buffer_view->setShape(path, false, false, false);
-	buffer_view->onClick = [this] { audio_processor.toggleBufferDebugger(); };
-	addAndMakeVisible(buffer_view);
+	_buffer_view->setShape(path, false, false, false);
+	_buffer_view->onClick = [this] { _audioProcessor.toggleBufferDebugger(); };
+	addAndMakeVisible(_buffer_view);
 
-	component_view->setShape(path, false, false, false);
-	component_view->onClick = [this] { toggleComponentDebugger(); };
-	addAndMakeVisible(component_view);
+	_component_view->setShape(path, false, false, false);
+	_component_view->onClick = [this] { toggleComponentDebugger(); };
+	addAndMakeVisible(_component_view);
 
-	valueTree_view->setShape(path, false, false, false);
-	valueTree_view->onClick = [this] { openValueTreeDebugger(); };
-	addAndMakeVisible(valueTree_view);
+	_valueTree_view->setShape(path, false, false, false);
+	_valueTree_view->onClick = [this] { openValueTreeDebugger(); };
+	addAndMakeVisible(_valueTree_view);
 
-	fontAndColour_view->setShape(path, false, false, false);
-	fontAndColour_view->onClick = [this] { toggleFontAndColourDesigner(); };
-	addAndMakeVisible(fontAndColour_view);
+	_fontAndColour_view->setShape(path, false, false, false);
+	_fontAndColour_view->onClick = [this] { toggleFontAndColourDesigner(); };
+	addAndMakeVisible(_fontAndColour_view);
 #endif
 
     // Set parameters for resonator components
     for (int i = 0; i < NUM_RESONATORS; i++) {
+		ResonatorControl& res = _res_controls[i];
 
 		for (int j = 0; j < notevals.size(); j++)
-			resonator_note_values[i].addItem(notevals[j], j + 1);
+			res._noteval_cmb.addItem(notevals[j], j + 1);
 
-		resonator_number_labels[i].setText              (std::to_string(i+1), NotificationType::dontSendNotification);
-		resonator_number_labels[i].attachToComponent    (&resonator_note_values[i], false);
+		res._lbl.setText              (std::to_string(i + 1), NotificationType::dontSendNotification);
+		res._lbl.attachToComponent    (&res._noteval_cmb, false);
 
 		for (int j = 0; j < 9; j++)
-			resonator_octaves[i].addItem(std::to_string(j), j + 1);
+			res._octave_cmb.addItem(std::to_string(j), j + 1);
 
-		resonator_detunings[i].setSliderStyle           (Slider::RotaryHorizontalVerticalDrag);
-		resonator_detunings[i].setRange                 (-100.0, 100.0, 1.0);
-		resonator_detunings[i].setPopupDisplayEnabled   (true, false, this);
-		resonator_detunings[i].setTextBoxStyle          (Slider::NoTextBox, false, 90, 0);
+		res._detune_sld.setSliderStyle           (Slider::RotaryHorizontalVerticalDrag);
+		res._detune_sld.setRange                 (-100.0, 100.0, 1.0);
+		res._detune_sld.setPopupDisplayEnabled   (true, false, this);
+		res._detune_sld.setTextBoxStyle          (Slider::NoTextBox, false, 90, 0);
 
-		resonator_decays[i].setSliderStyle              (Slider::RotaryHorizontalVerticalDrag);
-		resonator_decays[i].setRange                    (0., 100.0, 0.1);
-		resonator_decays[i].setTextBoxStyle             (Slider::NoTextBox, false, 90, 0);
-		resonator_decays[i].setPopupDisplayEnabled      (true, false, this);
+		res._decay_sld.setSliderStyle              (Slider::RotaryHorizontalVerticalDrag);
+		res._decay_sld.setRange                    (0., 100.0, 0.1);
+		res._decay_sld.setTextBoxStyle             (Slider::NoTextBox, false, 90, 0);
+		res._decay_sld.setPopupDisplayEnabled      (true, false, this);
 
-		resonator_dampings[i].setSliderStyle            (Slider::RotaryHorizontalVerticalDrag);
-		resonator_dampings[i].setRange                  (0.0, 100.0, 0.1);
-		resonator_dampings[i].setTextBoxStyle           (Slider::NoTextBox, false, 90, 0);
-		resonator_dampings[i].setPopupDisplayEnabled    (true, false, this);
+		res._damping_sld.setSliderStyle            (Slider::RotaryHorizontalVerticalDrag);
+		res._damping_sld.setRange                  (0.0, 100.0, 0.1);
+		res._damping_sld.setTextBoxStyle           (Slider::NoTextBox, false, 90, 0);
+		res._damping_sld.setPopupDisplayEnabled    (true, false, this);
 
-		pluck_buttons[i] = std::make_unique<ShapeButton>(String("Pulse"), 
+		res._volume_sld.setSliderStyle             (Slider::RotaryHorizontalVerticalDrag);
+		res._volume_sld.setRange                   (0.0, 10.0, 0.01);
+		res._volume_sld.setTextBoxStyle            (Slider::NoTextBox, false, 90, 0);
+		res._volume_sld.setPopupDisplayEnabled     (true, false, this);
+
+		res._pluck_btn = std::make_unique<ShapeButton>(String("Pulse"), 
 			Colour(128, 128, 128), 
 			Colour(150, 150, 150), 
 			Colour(90 ,  90,  90));
-		pluck_buttons[i]->setShape                      (path, false, false, false);
-		pluck_buttons[i]->onClick = [this, i] { audio_processor.pluckResonator(i); };
+		res._pluck_btn->setShape                      (path, false, false, false);
+		res._pluck_btn->onClick = [this, i] { _audioProcessor.pluckResonator(i); };
 
-		resonator_toggles[i] = std::make_unique<ShapeButton>(String("Pulse"), 
+		res._toggle_btn = std::make_unique<ShapeButton>(String("Pulse"), 
 			Colour(30, 0, 0), 
 			Colour(30, 0, 0), 
 			Colour(30, 0, 0));
-		resonator_toggles[i]->setOnColours(
+		res._toggle_btn->setOnColours(
 			Colour(128, 0, 0),
 			Colour(128, 0, 0),
 			Colour(128, 0, 0)
 		);
-		resonator_toggles[i]->shouldUseOnColours         (true);
-		resonator_toggles[i]->setShape                   (path, false, false, false);
-		resonator_toggles[i]->setToggleable              (true);
-		resonator_toggles[i]->setClickingTogglesState    (true);
-		resonator_toggles[i]->setToggleState             (true, NotificationType::dontSendNotification);
+		res._toggle_btn->shouldUseOnColours         (true);
+		res._toggle_btn->setShape                   (path, false, false, false);
+		res._toggle_btn->setToggleable              (true);
+		res._toggle_btn->setClickingTogglesState    (true);
+		res._toggle_btn->setToggleState             (true, NotificationType::dontSendNotification);
 
-		resonator_volumes[i].setSliderStyle             (Slider::RotaryHorizontalVerticalDrag);
-		resonator_volumes[i].setRange                   (0.0, 10.0, 0.01);
-		resonator_volumes[i].setTextBoxStyle            (Slider::NoTextBox, false, 90, 0);
-		resonator_volumes[i].setPopupDisplayEnabled     (true, false, this);
 
-		addAndMakeVisible(&resonator_note_values[i]);
-		addAndMakeVisible(    &resonator_octaves[i]);
-		addAndMakeVisible(  &resonator_detunings[i]);
-		addAndMakeVisible(     &resonator_decays[i]);
-		addAndMakeVisible(    &resonator_volumes[i]);
-		addAndMakeVisible(   &resonator_dampings[i]);
-		addAndMakeVisible(pluck_buttons[i].get());
-		addAndMakeVisible(resonator_toggles[i].get());
+		addAndMakeVisible(&res._noteval_cmb);
+		addAndMakeVisible(&res._octave_cmb);
+		addAndMakeVisible(&res._detune_sld);
+		addAndMakeVisible(&res._decay_sld);
+		addAndMakeVisible(&res._damping_sld);
+		addAndMakeVisible(&res._volume_sld);
+		addAndMakeVisible(res._pluck_btn.get());
+		addAndMakeVisible(res._pluck_btn.get());
     }
 
     // Set parameters for volume and mix sliders
-    output_volume_slider.setSliderStyle            (Slider::LinearVertical);
-    output_volume_slider.setRange                  (-100.0, 12.0, 0.1);
-    output_volume_slider.setSkewFactorFromMidPoint (0.0);
-    output_volume_slider.setTextBoxStyle           (Slider::NoTextBox, false, 90, 0);
-    output_volume_slider.setPopupDisplayEnabled    (true, false, this);
+    _out_sld.setSliderStyle            (Slider::LinearVertical);
+    _out_sld.setRange                  (-100.0, 12.0, 0.1);
+    _out_sld.setSkewFactorFromMidPoint (0.0);
+    _out_sld.setTextBoxStyle           (Slider::NoTextBox, false, 90, 0);
+    _out_sld.setPopupDisplayEnabled    (true, false, this);
 
-    input_volume_slider.setSliderStyle             (Slider::LinearVertical);
-    input_volume_slider.setRange                   (-100.0, 12.0, 0.1);
-    input_volume_slider.setSkewFactorFromMidPoint  (0.0);
-    input_volume_slider.setTextBoxStyle            (Slider::NoTextBox, false, 90, 0);
-    input_volume_slider.setPopupDisplayEnabled     (true, false, this);
+    _in_sld.setSliderStyle             (Slider::LinearVertical);
+    _in_sld.setRange                   (-100.0, 12.0, 0.1);
+    _in_sld.setSkewFactorFromMidPoint  (0.0);
+    _in_sld.setTextBoxStyle            (Slider::NoTextBox, false, 90, 0);
+    _in_sld.setPopupDisplayEnabled     (true, false, this);
 
-    wet_slider.setSliderStyle                      (Slider::LinearVertical);
-    wet_slider.setRange                            (0.0, 100.0, 0.1);
-    wet_slider.setTextBoxStyle                     (Slider::NoTextBox, false, 90, 0);
-	wet_slider.setTextValueSuffix                  ("%");
-    wet_slider.setPopupDisplayEnabled              (true, false, this);
+    _wet_sld.setSliderStyle                      (Slider::LinearVertical);
+    _wet_sld.setRange                            (0.0, 100.0, 0.1);
+    _wet_sld.setTextBoxStyle                     (Slider::NoTextBox, false, 90, 0);
+	_wet_sld.setTextValueSuffix                  ("%");
+    _wet_sld.setPopupDisplayEnabled              (true, false, this);
 
-	mono_stereo_select.addItem("Mono"  , 1);
-	mono_stereo_select.addItem("Stereo", 2);
-	mono_stereo_select.setSelectedId(2);
-	mono_stereo_select.onChange = [this] {
-		switch (mono_stereo_select.getSelectedId()) {
-			case 1:  audio_processor.mono = true;  break;
-			case 2:  audio_processor.mono = false; break;
+	_mono_stereo_cmb.addItem("Mono"  , 1);
+	_mono_stereo_cmb.addItem("Stereo", 2);
+	_mono_stereo_cmb.setSelectedId(2);
+	_mono_stereo_cmb.onChange = [this] {
+		switch (_mono_stereo_cmb.getSelectedId()) {
+			case 1:  _audioProcessor._mono = true;  break;
+			case 2:  _audioProcessor._mono = false; break;
 			default: break;
 		}
 	};
 
-    addAndMakeVisible(&output_volume_slider);
-    addAndMakeVisible(&input_volume_slider);
-    addAndMakeVisible(&wet_slider);
-	addAndMakeVisible(&mono_stereo_select);
+    addAndMakeVisible(&_out_sld);
+    addAndMakeVisible(&_in_sld);
+    addAndMakeVisible(&_wet_sld);
+	addAndMakeVisible(&_mono_stereo_cmb);
 
 	// Attach components to audio processer state tree
 	for (size_t i = 0; i < NUM_RESONATORS; i++) {
-		note_attachments.push_back   (std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(
-			audio_processor.parameters,  NOTEVAL_ID(i), resonator_note_values[i]));
-		octave_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(
-			audio_processor.parameters, REGISTER_ID(i),     resonator_octaves[i]));
-		detune_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
-			audio_processor.parameters, DETUNE_ID(i),     resonator_detunings[i]));
-		decay_attachments.push_back  (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
-			audio_processor.parameters,    DECAY_ID(i),      resonator_decays[i]));
-		damping_attachments.push_back  (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
-			audio_processor.parameters,  DAMPING_ID(i),    resonator_dampings[i]));
-		volume_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
-			audio_processor.parameters,   VOLUME_ID(i),     resonator_volumes[i]));
-		toggle_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(
-			audio_processor.parameters,   TOGGLE_ID(i),    *resonator_toggles[i]));
+		ResonatorControl& res = _res_controls[i];
+		_noteval_attachments.push_back   (std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(
+			_audioProcessor._parameters,  NOTEVAL_ID(i), res._noteval_cmb));
+		_octave_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(
+			_audioProcessor._parameters, OCTAVE_ID(i), res._octave_cmb));
+		_detune_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+			_audioProcessor._parameters,   DETUNE_ID(i), res._detune_sld));
+		_decay_attachments.push_back  (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+			_audioProcessor._parameters,    DECAY_ID(i), res._decay_sld));
+		_damping_attachments.push_back  (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+			_audioProcessor._parameters,  DAMPING_ID(i), res._damping_sld));
+		_volume_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+			_audioProcessor._parameters,   VOLUME_ID(i), res._volume_sld));
+		_toggle_attachments.push_back (std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(
+			_audioProcessor._parameters,   TOGGLE_ID(i), *res._toggle_btn.get()));
 	}
 
-	input_attachment  = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
-		audio_processor.parameters, INPUT_ID , input_volume_slider);
-	output_attachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
-		audio_processor.parameters, OUTPUT_ID, output_volume_slider);
-	wet_attachment    = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
-		audio_processor.parameters, WET_ID   , wet_slider);
+	_in_attachment  = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+		_audioProcessor._parameters, INPUT_ID , _in_sld);
+	_out_attachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+		_audioProcessor._parameters, OUTPUT_ID, _out_sld);
+	_wet_attachment    = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
+		_audioProcessor._parameters, WET_ID   , _wet_sld);
 
     // Set parameters for labels
-	resonator_note_value_label.setText           ("Note", NotificationType::dontSendNotification);
-	resonator_note_value_label.attachToComponent (&resonator_note_values[0], true);
+	_noteval_lbl.setText           ("Note", NotificationType::dontSendNotification);
+	_noteval_lbl.attachToComponent (&_res_controls[0]._noteval_cmb, true);
 
-	resonator_octave_label.setText               ("Octave", NotificationType::dontSendNotification);
-	resonator_octave_label.attachToComponent     (&resonator_octaves[0], true);
+	_octave_lbl.setText               ("Octave", NotificationType::dontSendNotification);
+	_octave_lbl.attachToComponent     (&_res_controls[0]._octave_cmb, true);
 
-	resonator_detune_label.setText               ("Detune", NotificationType::dontSendNotification);
-	resonator_detune_label.attachToComponent     (&resonator_detunings[0], true);
+	_detune_lbl.setText               ("Detune", NotificationType::dontSendNotification);
+	_detune_lbl.attachToComponent     (&_res_controls[0]._detune_sld, true);
 
-    resonator_decay_label.setText                ("Decay", NotificationType::dontSendNotification);
-    resonator_decay_label.attachToComponent      (&resonator_decays[0], true);
+    _decay_lbl.setText                ("Decay", NotificationType::dontSendNotification);
+    _decay_lbl.attachToComponent      (&_res_controls[0]._decay_sld, true);
 
-	resonator_damping_label.setText              ("Damping", NotificationType::dontSendNotification);
-	resonator_damping_label.attachToComponent    (&resonator_dampings[0], true);
+	_damping_lbl.setText              ("Damping", NotificationType::dontSendNotification);
+	_damping_lbl.attachToComponent    (&_res_controls[0]._damping_sld, true);
     
-	volume_slider_label.setText                  ("Volume", NotificationType::dontSendNotification);
-	volume_slider_label.attachToComponent        (&resonator_volumes[0], true);
+	_volume_lbl.setText                  ("Volume", NotificationType::dontSendNotification);
+	_volume_lbl.attachToComponent        (&_res_controls[0]._volume_sld, true);
 
-    output_volume_label.setText                  ("Out", NotificationType::dontSendNotification);
-    output_volume_label.attachToComponent        (&output_volume_slider, false);
+    _out_lbl.setText                  ("Out", NotificationType::dontSendNotification);
+    _out_lbl.attachToComponent        (&_out_sld, false);
 
-    input_volume_label.setText                   ("In", NotificationType::dontSendNotification);
-    input_volume_label.attachToComponent         (&input_volume_slider, false);
+    _in_lbl.setText                   ("In", NotificationType::dontSendNotification);
+    _in_lbl.attachToComponent         (&_in_sld, false);
 
-    wet_label.setText                            ("Wet", NotificationType::dontSendNotification);
-    wet_label.attachToComponent                  (&wet_slider, false);
+    _wet_lbl.setText                            ("Wet", NotificationType::dontSendNotification);
+    _wet_lbl.attachToComponent                  (&_wet_sld, false);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -225,9 +228,9 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 ResonatorProjectAudioProcessorEditor::~ResonatorProjectAudioProcessorEditor()
 {
 #if(_DEBUG)
-	if (componentDebugger != nullptr)     delete componentDebugger;
-	if (valueTreeDebugger != nullptr)     delete valueTreeDebugger;
-	if (fontAndColourDesigner != nullptr) delete fontAndColourDesigner;
+	if (_componentDebugger != nullptr)     delete _componentDebugger;
+	if (_valueTreeDebugger != nullptr)     delete _valueTreeDebugger;
+	if (_fontAndColourDesigner != nullptr) delete _fontAndColourDesigner;
 #endif
 }
 
@@ -255,7 +258,7 @@ void ResonatorProjectAudioProcessorEditor::resized()
 	area.removeFromTop(header_height);
 	area.removeFromBottom(footer_height);
 
-	mono_stereo_select.setBounds(getWidth() - section_width, getHeight() - 60, section_width, 40);
+	_mono_stereo_cmb.setBounds(getWidth() - section_width, getHeight() - 60, section_width, 40);
 
 
 #if(_DEBUG)
@@ -265,49 +268,51 @@ void ResonatorProjectAudioProcessorEditor::resized()
 	debug_sidebar.flexWrap = FlexBox::Wrap::wrap;
 	debug_sidebar.flexDirection = FlexBox::Direction::column;
 
-	debug_sidebar.items.add(FlexItem(*buffer_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
-	debug_sidebar.items.add(FlexItem(*component_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
-	debug_sidebar.items.add(FlexItem(*valueTree_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
-	debug_sidebar.items.add(FlexItem(*fontAndColour_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
+	debug_sidebar.items.add(FlexItem(*_buffer_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
+	debug_sidebar.items.add(FlexItem(*_component_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
+	debug_sidebar.items.add(FlexItem(*_valueTree_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
+	debug_sidebar.items.add(FlexItem(*_fontAndColour_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
 	debug_sidebar.performLayout(area.removeFromRight(debug_width));
-	mono_stereo_select.setBounds(getWidth() - section_width - debug_width, getHeight() - 60, section_width, 40);
+	_mono_stereo_cmb.setBounds(getWidth() - section_width - debug_width, getHeight() - 60, section_width, 40);
 #endif
 
 
-	input_volume_slider.setBounds(area.removeFromLeft(section_width));
-	output_volume_slider.setBounds(area.removeFromRight(section_width));
-	wet_slider.setBounds(area.removeFromRight(section_width));
+	_in_sld.setBounds(area.removeFromLeft(section_width));
+	_out_sld.setBounds(area.removeFromRight(section_width));
+	_wet_sld.setBounds(area.removeFromRight(section_width));
 
 	area.removeFromLeft(section_width); // space for resonator component labels
 	FlexBox resonator_sections[NUM_RESONATORS];
 	for (int i = 0; i < NUM_RESONATORS; i++) {
+		ResonatorControl& res = _res_controls[i];
+
 		resonator_sections[i].flexWrap = FlexBox::Wrap::wrap;
 		resonator_sections[i].flexDirection = FlexBox::Direction::column;
 		resonator_sections[i].justifyContent = FlexBox::JustifyContent::spaceBetween;
 		resonator_sections[i].alignContent = FlexBox::AlignContent::center;
 
-		resonator_sections[i].items.add(FlexItem(resonator_note_values[i])
+		resonator_sections[i].items.add(FlexItem(res._noteval_cmb)
 			.withWidth(section_width)
 			.withHeight(combo_height));
-		resonator_sections[i].items.add(FlexItem(resonator_octaves[i])
+		resonator_sections[i].items.add(FlexItem(res._octave_cmb)
 			.withWidth(section_width)
 			.withHeight(combo_height));
-		resonator_sections[i].items.add(FlexItem(resonator_detunings[i])
+		resonator_sections[i].items.add(FlexItem(res._detune_sld)
 			.withWidth(section_width)
 			.withHeight(section_width));
-		resonator_sections[i].items.add(FlexItem(resonator_decays[i])
+		resonator_sections[i].items.add(FlexItem(res._decay_sld)
 			.withWidth(section_width)
 			.withHeight(section_width));
-		resonator_sections[i].items.add(FlexItem(resonator_dampings[i])
+		resonator_sections[i].items.add(FlexItem(res._damping_sld)
 			.withWidth(section_width)
 			.withHeight(section_width));
-		resonator_sections[i].items.add(FlexItem(resonator_volumes[i])
+		resonator_sections[i].items.add(FlexItem(res._volume_sld)
 			.withWidth(section_width)
 			.withHeight(section_width));
-		resonator_sections[i].items.add(FlexItem(*pluck_buttons[i])
+		resonator_sections[i].items.add(FlexItem(*res._pluck_btn)
 			.withWidth(section_width)
 			.withHeight(section_width));
-		resonator_sections[i].items.add(FlexItem(*resonator_toggles[i])
+		resonator_sections[i].items.add(FlexItem(*res._toggle_btn)
 			.withWidth(section_width)
 			.withHeight(section_width));
 		resonator_sections[i].performLayout(area.removeFromLeft(section_width));
@@ -320,18 +325,18 @@ void ResonatorProjectAudioProcessorEditor::resized()
 using namespace jcf;
 void ResonatorProjectAudioProcessorEditor::toggleComponentDebugger()
 {
-    if (componentDebugger == nullptr)
-		componentDebugger = new ComponentDebugger(this);
-    else delete componentDebugger;
+    if (_componentDebugger == nullptr)
+		_componentDebugger = new ComponentDebugger(this);
+    else delete _componentDebugger;
 }
 
 void ResonatorProjectAudioProcessorEditor::openValueTreeDebugger()
 {
 	MemoryBlock stateInfo(sizeof(ValueTree));
-	audio_processor.getStateInformation(stateInfo);
+	_audioProcessor.getStateInformation(stateInfo);
 	ValueTree tree = *(ValueTree *) stateInfo.getData();
-	if (valueTreeDebugger != nullptr) delete valueTreeDebugger;
-    valueTreeDebugger = new jcf::ValueTreeDebugger(tree);
+	if (_valueTreeDebugger != nullptr) delete _valueTreeDebugger;
+    _valueTreeDebugger = new jcf::ValueTreeDebugger(tree);
 }
 
 void ResonatorProjectAudioProcessorEditor::toggleFontAndColourDesigner()

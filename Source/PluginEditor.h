@@ -14,23 +14,74 @@
 #include "NoteSlider.h"
 #include "VirtualResonators.h"
 
-enum class Parameter {
-    AddNoise,
-    BufferToggle,
-    DecayTime,
-    Frequency,
-    OutputVolume,
-    InputVolume,
-    WetDry,
-    ResonatorVolume
-};
-
 //==============================================================================
 /**
 */
 class ResonatorProjectAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
+    struct ResonatorControl {
+        Label             _lbl;
+		ComboBox          _noteval_cmb;
+		ComboBox          _octave_cmb;
+		Slider            _detune_sld;
+		Slider            _decay_sld;
+		Slider            _volume_sld;
+		Slider            _damping_sld;
+		uptr<ShapeButton> _pluck_btn;
+		uptr<ShapeButton> _toggle_btn;
+    } _res_controls[NUM_RESONATORS];
+
+    // I/O components
+    DecibelSlider     _in_sld;
+    Slider            _wet_sld;
+    DecibelSlider     _out_sld;
+
+    // Footer components
+    ComboBox _mono_stereo_cmb;
+
+    // Paramter Attachments
+    std::vector<uptr<AudioProcessorValueTreeState::ComboBoxAttachment>> _noteval_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::ComboBoxAttachment>> _octave_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   _detune_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   _decay_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   _damping_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   _volume_attachments;
+    std::vector<uptr<AudioProcessorValueTreeState::ButtonAttachment>>   _toggle_attachments;
+    uptr<AudioProcessorValueTreeState::SliderAttachment> _in_attachment;
+    uptr<AudioProcessorValueTreeState::SliderAttachment> _wet_attachment;
+    uptr<AudioProcessorValueTreeState::SliderAttachment> _out_attachment;
+
+    // Labels
+    Label _noteval_lbl;
+    Label _octave_lbl;
+    Label _detune_lbl;
+    Label _decay_lbl;
+    Label _damping_lbl;
+    Label _volume_lbl;
+    Label _in_lbl;
+    Label _wet_lbl;
+    Label _out_lbl;
+
+
+#if(_DEBUG)
+    ShapeButton* _buffer_view;
+    ShapeButton* _component_view;
+    ShapeButton* _valueTree_view;
+    ShapeButton* _fontAndColour_view;
+
+    void toggleComponentDebugger();
+    void openValueTreeDebugger();
+    void toggleFontAndColourDesigner();
+
+    jcf::ComponentDebugger*     _componentDebugger     = nullptr;
+    jcf::ValueTreeDebugger*     _valueTreeDebugger     = nullptr;
+    jcf::FontAndColourDesigner* _fontAndColourDesigner = nullptr;
+#endif
+
+    ResonatorProjectAudioProcessor& _audioProcessor;
+
 public:
+
     ResonatorProjectAudioProcessorEditor (ResonatorProjectAudioProcessor&);
     ~ResonatorProjectAudioProcessorEditor() override;
 
@@ -39,67 +90,5 @@ public:
     void resized() override;
 
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
-    ResonatorProjectAudioProcessor& audio_processor;
-
-#if(_DEBUG)
-    ShapeButton* buffer_view;
-    ShapeButton* component_view;
-    ShapeButton* valueTree_view;
-    ShapeButton* fontAndColour_view;
-
-    void toggleComponentDebugger();
-    void openValueTreeDebugger();
-    void toggleFontAndColourDesigner();
-
-    jcf::ComponentDebugger*     componentDebugger     = nullptr;
-    jcf::ValueTreeDebugger*     valueTreeDebugger     = nullptr;
-    jcf::FontAndColourDesigner* fontAndColourDesigner = nullptr;
-#endif
-
-
-    // Resonator components
-    ComboBox          resonator_note_values [NUM_RESONATORS];
-    ComboBox          resonator_octaves     [NUM_RESONATORS];
-    Slider            resonator_decays      [NUM_RESONATORS];
-    Slider            resonator_volumes     [NUM_RESONATORS];
-    Slider            resonator_dampings    [NUM_RESONATORS];
-    Slider            resonator_detunings   [NUM_RESONATORS];
-    uptr<ShapeButton> pluck_buttons         [NUM_RESONATORS];
-    uptr<ShapeButton> resonator_toggles     [NUM_RESONATORS];
-
-    // I/O components
-    DecibelSlider     input_volume_slider;
-    Slider            wet_slider;
-    DecibelSlider     output_volume_slider;
-
-    // Footer components
-    ComboBox mono_stereo_select;
-
-    // Paramter Attachments
-    std::vector<uptr<AudioProcessorValueTreeState::ComboBoxAttachment>> note_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::ComboBoxAttachment>> octave_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   detune_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   decay_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   damping_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>   volume_attachments;
-    std::vector<uptr<AudioProcessorValueTreeState::ButtonAttachment>>   toggle_attachments;
-    uptr<AudioProcessorValueTreeState::SliderAttachment> input_attachment;
-    uptr<AudioProcessorValueTreeState::SliderAttachment> wet_attachment;
-    uptr<AudioProcessorValueTreeState::SliderAttachment> output_attachment;
-
-    // Labels
-    Label resonator_number_labels[NUM_RESONATORS];
-    Label resonator_note_value_label;
-    Label resonator_octave_label;
-    Label resonator_detune_label;
-    Label resonator_decay_label;
-    Label resonator_damping_label;
-    Label volume_slider_label;
-    Label input_volume_label;
-    Label wet_label;
-    Label output_volume_label;
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessorEditor)
 };

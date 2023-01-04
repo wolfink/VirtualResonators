@@ -17,8 +17,8 @@
 // Names and IDs for parameters
 #define    NOTEVAL_ID(index) "note value "          + std::to_string(index)
 #define  NOTEVAL_NAME(index) "Note->Resonator "     + std::to_string(index)
-#define   REGISTER_ID(index) "note register "       + std::to_string(index)
-#define REGISTER_NAME(index) "Register->Resonator " + std::to_string(index)
+#define   OCTAVE_ID(index) "note register "       + std::to_string(index)
+#define OCTAVE_NAME(index) "Register->Resonator " + std::to_string(index)
 #define     DETUNE_ID(index) "note detune "         + std::to_string(index)
 #define   DETUNE_NAME(index) "Detune->Resonator"    + std::to_string(index)
 #define      DECAY_ID(index) "decay "               + std::to_string(index)
@@ -40,7 +40,7 @@ const StringArray notevals = { "C", "C#/Db", "D", "D#/Eb",
 							   "E", "F", "F#/Gb", "G",
 							   "G#/Ab", "A", "A#/Gb", "B" };
 
-#define PARAM_VAL(name) *parameters.getRawParameterValue(name)
+#define PARAM_VAL(name) *_parameters.getRawParameterValue(name)
 
 //==============================================================================
 /**
@@ -51,13 +51,13 @@ class DCBlocker;
 class ResonatorProjectAudioProcessor : public AudioProcessor
 {
     //==============================================================================
-    std::vector<StringModel> synths;
-    std::vector<DCBlocker>   dc_blockers;
+    std::vector<StringModel> _resonators;
+    std::vector<DCBlocker>   _dc_blockers;
 
 public:
 
-    AudioProcessorValueTreeState parameters;
-    bool mono;
+    AudioProcessorValueTreeState _parameters;
+    bool _mono;
 
     //==============================================================================
     ResonatorProjectAudioProcessor();
@@ -115,15 +115,15 @@ private:
 };
 
 class DCBlocker {
-    float prev_x;
-    float prev_y;
+    float _prev_x;
+    float _prev_y;
 public:
-    DCBlocker(): prev_x(0.0f), prev_y(0.0f) {}
+    DCBlocker(): _prev_x(0.0f), _prev_y(0.0f) {}
     float process_sample(float sample)
     {
-        float retval = sample - prev_x + 0.995 * prev_y;
-        prev_x = sample;
-        prev_y = retval;
+        float retval = sample - _prev_x + 0.995 * _prev_y;
+        _prev_x = sample;
+        _prev_y = retval;
         return retval;
     }
 };
