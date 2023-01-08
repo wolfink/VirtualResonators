@@ -94,14 +94,14 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		res._volume_sld.setTextBoxStyle            (Slider::NoTextBox, false, 90, 0);
 		res._volume_sld.setPopupDisplayEnabled     (true, false, this);
 
-		res._pluck_btn = std::make_unique<ShapeButton>(String("Pulse"), 
+		res._pluck_btn = std::make_unique<ShapeButton>(String("Pluck"), 
 			Colour(128, 128, 128), 
 			Colour(150, 150, 150), 
 			Colour(90 ,  90,  90));
 		res._pluck_btn->setShape                      (path, false, false, false);
 		res._pluck_btn->onClick = [this, i] { _audioProcessor.pluckResonator(i); };
 
-		res._toggle_btn = std::make_unique<ShapeButton>(String("Pulse"), 
+		res._toggle_btn = std::make_unique<ShapeButton>(String("On/Off"), 
 			Colour(30, 0, 0), 
 			Colour(30, 0, 0), 
 			Colour(30, 0, 0));
@@ -156,6 +156,25 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 			default: break;
 		}
 	};
+
+	{
+		Path preset_btn_shape;
+		preset_btn_shape.addTriangle(0, 10, 20, 20, 20, 0);
+		_preset_control._left_btn = std::make_unique<ShapeButton>(String("Left Pre"),
+			Colour(128, 128, 128), 
+			Colour(150, 150, 150), 
+			Colour(90 ,  90,  90));
+		_preset_control._left_btn->setShape(preset_btn_shape, false, false, false);
+		preset_btn_shape.applyTransform(AffineTransform::rotation(MathConstants<float>::pi));
+		_preset_control._right_btn = std::make_unique<ShapeButton>(String("Right Pre"),
+			Colour(128, 128, 128), 
+			Colour(150, 150, 150), 
+			Colour(90 ,  90,  90));
+		_preset_control._right_btn->setShape(preset_btn_shape, false, false, false);
+		addAndMakeVisible(_preset_control._left_btn.get());
+		addAndMakeVisible(_preset_control._right_btn.get());
+		addAndMakeVisible(&_preset_control._preset_name);
+	}
 
     addAndMakeVisible(&_out_sld);
     addAndMakeVisible(&_in_sld);
@@ -249,18 +268,6 @@ void ResonatorProjectAudioProcessorEditor::resized()
 {
 	auto area = getLocalBounds();
 
-	auto header_height = 80;
-	auto footer_height = 80;
-	auto section_width = 80;
-	auto section_pad   = 10;
-	auto combo_height  = 20;
-
-	area.removeFromTop(header_height);
-	area.removeFromBottom(footer_height);
-
-	_mono_stereo_cmb.setBounds(getWidth() - section_width, getHeight() - 60, section_width, 40);
-
-
 #if(_DEBUG)
 	FlexBox debug_sidebar;
 	auto debug_width = 50;
@@ -273,9 +280,42 @@ void ResonatorProjectAudioProcessorEditor::resized()
 	debug_sidebar.items.add(FlexItem(*_valueTree_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
 	debug_sidebar.items.add(FlexItem(*_fontAndColour_view).withMaxHeight(debug_width).withMinWidth(debug_width).withFlex(1));
 	debug_sidebar.performLayout(area.removeFromRight(debug_width));
-	_mono_stereo_cmb.setBounds(getWidth() - section_width - debug_width, getHeight() - 60, section_width, 40);
+	//_mono_stereo_cmb.setBounds(getWidth() - section_width - debug_width, getHeight() - 60, section_width, 40);
 #endif
 
+	auto header_height = 80;
+	auto footer_height = 80;
+	auto section_width = 80;
+	auto section_pad   = 10;
+	auto combo_height  = 20;
+	auto preset_height = 30;
+
+	area.removeFromTop(header_height);
+
+	//_mono_stereo_cmb.setBounds(getWidth() - section_width, getHeight() - 60, section_width, 40);
+
+	FlexBox preset_bar;
+	FlexBox mono_stereo_section;
+	auto footer_area = area.removeFromBottom(footer_height);
+
+	footer_area.removeFromLeft(2 * section_width);
+
+	mono_stereo_section.justifyContent = FlexBox::JustifyContent::center;
+	mono_stereo_section.alignItems     = FlexBox::AlignItems::center;
+	mono_stereo_section.items.add(FlexItem(_mono_stereo_cmb).withHeight(50).withWidth(section_width));
+	mono_stereo_section.performLayout(footer_area.removeFromRight(2 * section_width));
+
+	preset_bar.alignItems = FlexBox::AlignItems::center;
+	preset_bar.items.add(FlexItem(*_preset_control._left_btn)
+		.withWidth(preset_height)
+		.withHeight(preset_height));
+	preset_bar.items.add(FlexItem(_preset_control._preset_name)
+		.withFlex(1)
+		.withHeight(preset_height));
+	preset_bar.items.add(FlexItem(*_preset_control._right_btn)
+		.withWidth(preset_height)
+		.withHeight(preset_height));	
+	preset_bar.performLayout(footer_area);
 
 	_in_sld.setBounds(area.removeFromLeft(section_width));
 	_out_sld.setBounds(area.removeFromRight(section_width));
@@ -289,7 +329,6 @@ void ResonatorProjectAudioProcessorEditor::resized()
 		resonator_sections[i].flexWrap = FlexBox::Wrap::wrap;
 		resonator_sections[i].flexDirection = FlexBox::Direction::column;
 		resonator_sections[i].justifyContent = FlexBox::JustifyContent::spaceBetween;
-		resonator_sections[i].alignContent = FlexBox::AlignContent::center;
 
 		resonator_sections[i].items.add(FlexItem(res._noteval_cmb)
 			.withWidth(section_width)

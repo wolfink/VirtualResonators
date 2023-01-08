@@ -31,6 +31,12 @@ class ResonatorProjectAudioProcessorEditor  : public juce::AudioProcessorEditor
 		uptr<ShapeButton> _toggle_btn;
     } _res_controls[NUM_RESONATORS];
 
+    struct PresetControl {
+        uptr<ShapeButton> _left_btn;
+        uptr<ShapeButton> _right_btn;
+        ComboBox          _preset_name;
+    } _preset_control;
+
     // I/O components
     DecibelSlider     _in_sld;
     Slider            _wet_sld;
