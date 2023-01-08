@@ -332,9 +332,10 @@ void ResonatorProjectAudioProcessorEditor::toggleComponentDebugger()
 
 void ResonatorProjectAudioProcessorEditor::openValueTreeDebugger()
 {
-	MemoryBlock stateInfo(sizeof(ValueTree));
+	MemoryBlock stateInfo;
 	_audioProcessor.getStateInformation(stateInfo);
-	ValueTree tree = *(ValueTree *) stateInfo.getData();
+	String xml_str = String((char*) stateInfo.getData(), stateInfo.getSize());
+	ValueTree tree = ValueTree::fromXml(*parseXML(xml_str));
 	if (_valueTreeDebugger != nullptr) delete _valueTreeDebugger;
     _valueTreeDebugger = new jcf::ValueTreeDebugger(tree);
 }

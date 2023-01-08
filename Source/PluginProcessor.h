@@ -17,8 +17,8 @@
 // Names and IDs for parameters
 #define    NOTEVAL_ID(index) "note value "          + std::to_string(index)
 #define  NOTEVAL_NAME(index) "Note->Resonator "     + std::to_string(index)
-#define   OCTAVE_ID(index) "note register "       + std::to_string(index)
-#define OCTAVE_NAME(index) "Register->Resonator " + std::to_string(index)
+#define     OCTAVE_ID(index) "note register "       + std::to_string(index)
+#define   OCTAVE_NAME(index) "Register->Resonator " + std::to_string(index)
 #define     DETUNE_ID(index) "note detune "         + std::to_string(index)
 #define   DETUNE_NAME(index) "Detune->Resonator"    + std::to_string(index)
 #define      DECAY_ID(index) "decay "               + std::to_string(index)
