@@ -124,7 +124,7 @@ ResonatorProjectAudioProcessorEditor::ResonatorProjectAudioProcessorEditor (Reso
 		addAndMakeVisible(&res._damping_sld);
 		addAndMakeVisible(&res._volume_sld);
 		addAndMakeVisible(res._pluck_btn.get());
-		addAndMakeVisible(res._pluck_btn.get());
+		addAndMakeVisible(res._toggle_btn.get());
     }
 
     // Set parameters for volume and mix sliders
