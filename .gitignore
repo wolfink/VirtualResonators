@@ -12,3 +12,4 @@ Logs/
 .vs/
 *.filtergraph
 /roadmap.txt
+*.vst3
