@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="ldlecT" name="Virtual Resonators" projectType="audioplug"
               jucerFormatVersion="1" pluginVST3Category="Modulation,Reverb"
-              version="0.3.0">
+              version="0.3.0" pluginFormats="buildVST3">
   <MAINGROUP id="LXliL1" name="Virtual Resonators">
     <GROUP id="{2E53CB84-5AD1-01EE-CE0A-7E8F6143FC62}" name="Source">
       <FILE id="IBtKcU" name="VirtualResonators.h" compile="0" resource="0"
