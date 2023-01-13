@@ -70,16 +70,6 @@ VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResona
 		}
 	};
 
-	{
-		Path preset_btn_shape;
-		preset_btn_shape.addTriangle(0, 10, 20, 20, 20, 0);
-		configShapeButton(_preset_control._left_btn , "LeftPre" , preset_btn_shape, Colour(128, 128, 128));
-		preset_btn_shape.applyTransform(AffineTransform::rotation(MathConstants<float>::pi));
-		configShapeButton(_preset_control._right_btn, "RightPre", preset_btn_shape, Colour(128, 128, 128));
-		configComboBox(_preset_control._preset_name, { "Empty" });
-		configTextButton(_preset_control._save_btn, "Save");
-	}
-
 	// Attach components to audio processer state tree
 	for (size_t i = 0; i < NUM_RESONATORS; i++) {
 		ResonatorControl& res = _res_controls[i];
@@ -134,6 +124,7 @@ VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResona
     _wet_lbl.setText                            ("Wet", NotificationType::dontSendNotification);
     _wet_lbl.attachToComponent                  (&_wet_sld, false);
 
+	addAndMakeVisible(_preset_control);
 #if(_DEBUG)
 	addAndMakeVisible(_debug);
 
@@ -171,13 +162,11 @@ void VirtualResonatorsProcessorEditor::resized()
 	auto section_width = 80;
 	auto section_pad   = 10;
 	auto combo_height  = 20;
-	auto preset_height = 30;
 
 	area.removeFromTop(header_height);
 
 	//_mono_stereo_cmb.setBounds(getWidth() - section_width, getHeight() - 60, section_width, 40);
 
-	FlexBox preset_bar;
 	FlexBox mono_stereo_section;
 	auto footer_area = area.removeFromBottom(footer_height);
 
@@ -188,23 +177,7 @@ void VirtualResonatorsProcessorEditor::resized()
 	mono_stereo_section.items.add(FlexItem(_mono_stereo_cmb).withHeight(50).withWidth(section_width));
 	mono_stereo_section.performLayout(footer_area.removeFromRight(2 * section_width));
 
-	preset_bar.alignItems = FlexBox::AlignItems::center;
-	preset_bar.items.add(FlexItem(_preset_control._left_btn)
-		.withWidth(preset_height)
-		.withHeight(preset_height)
-		.withMargin(FlexItem::Margin(0, 5, 0, 0)));
-	preset_bar.items.add(FlexItem(_preset_control._preset_name)
-		.withFlex(1)
-		.withHeight(preset_height)
-		.withMargin(FlexItem::Margin(0, 5, 0, 0)));
-	preset_bar.items.add(FlexItem(_preset_control._right_btn)
-		.withWidth(preset_height)
-		.withHeight(preset_height));
-	preset_bar.items.add(FlexItem(_preset_control._save_btn)
-		.withFlex(0.25)
-		.withHeight(preset_height)
-		.withMargin(FlexItem::Margin(0, 0, 0, section_pad)));
-	preset_bar.performLayout(footer_area);
+	_preset_control.setBounds(footer_area);
 
 	_in_sld.setBounds(area.removeFromLeft(section_width));
 	_out_sld.setBounds(area.removeFromRight(section_width));
@@ -247,6 +220,44 @@ void VirtualResonatorsProcessorEditor::resized()
 
 		if (i < NUM_RESONATORS - 1) area.removeFromLeft(section_pad);
 	}
+}
+
+VirtualResonatorsProcessorEditor::PresetControl::PresetControl()
+{
+	Path preset_btn_shape;
+	preset_btn_shape.addTriangle(0, 10, 20, 20, 20, 0);
+
+	configShapeButton(_left_btn , "LeftPre" , preset_btn_shape, Colour(128, 128, 128));
+
+	preset_btn_shape.applyTransform(AffineTransform::rotation(MathConstants<float>::pi));
+	configShapeButton(_right_btn, "RightPre", preset_btn_shape, Colour(128, 128, 128));
+
+	configComboBox(_preset_name, { "Empty" });
+	configTextButton(_save_btn, "Save");
+}
+
+void VirtualResonatorsProcessorEditor::PresetControl::resized()
+{
+	FlexBox preset_bar;
+	auto preset_height = 30;
+
+	preset_bar.alignItems = FlexBox::AlignItems::center;
+	preset_bar.items.add(FlexItem(_left_btn)
+		.withWidth(preset_height)
+		.withHeight(preset_height)
+		.withMargin(FlexItem::Margin(0, 5, 0, 0)));
+	preset_bar.items.add(FlexItem(_preset_name)
+		.withFlex(1)
+		.withHeight(preset_height)
+		.withMargin(FlexItem::Margin(0, 5, 0, 0)));
+	preset_bar.items.add(FlexItem(_right_btn)
+		.withWidth(preset_height)
+		.withHeight(preset_height));
+	preset_bar.items.add(FlexItem(_save_btn)
+		.withFlex(0.25)
+		.withHeight(preset_height)
+		.withMargin(FlexItem::Margin(0, 0, 0, 10)));
+	preset_bar.performLayout(getLocalBounds());
 }
 
 #if(_DEBUG)

@@ -15,16 +15,13 @@
 #include "VirtualResonators.h"
 
 //==============================================================================
-class VRShapeButton : public ShapeButton {
-public:
+struct VRShapeButton : public ShapeButton {
     VRShapeButton() : ShapeButton("Noname", Colours::white, Colours::white, Colours::black) { }
 };
 
 template<class ComponentClass = Component>
-class VirtualResonatorsComponent : public ComponentClass
+struct VirtualResonatorsComponent : public ComponentClass
 {
-public:
-
     VirtualResonatorsComponent() : ComponentClass() {}
 
     template<typename CC = ComponentClass,
@@ -71,6 +68,7 @@ public:
         button.setButtonText(text);
         addAndMakeVisible(button);
     }
+
 private:
     void configSlider(Slider& slider, float low, float high, float step) {
 		slider.setRange                 (low, high, step);
@@ -82,17 +80,23 @@ private:
 
 class VirtualResonatorsProcessorEditor : public VirtualResonatorsComponent<AudioProcessorEditor>
 {
-    struct ResonatorControl {
+    struct ResonatorControl
+    {
         Label       _lbl;
 		ComboBox    _noteval_cmb, _octave_cmb;
         Slider      _detune_sld, _decay_sld, _volume_sld, _damping_sld;
 		VRShapeButton _pluck_btn, _toggle_btn;
     } _res_controls[NUM_RESONATORS];
 
-    struct PresetControl {
+    class PresetControl : public VirtualResonatorsComponent<>
+    {
         VRShapeButton _left_btn, _right_btn;
         TextButton  _save_btn, _delete_btn;
         ComboBox    _preset_name;
+
+    public:
+        PresetControl();
+        void resized() override;
     } _preset_control;
 
     // I/O components
@@ -121,25 +125,26 @@ class VirtualResonatorsProcessorEditor : public VirtualResonatorsComponent<Audio
 
 
 #if(_DEBUG)
-    struct DebugPanel : public VirtualResonatorsComponent<> {
+    class DebugPanel : public VirtualResonatorsComponent<>
+    {
         VirtualResonatorsProcessorEditor& parent;
 		jcf::ComponentDebugger _componentDebugger;
 		jcf::ValueTreeDebugger _valueTreeDebugger;
-    public:
 		VRShapeButton _buffer_view, _component_view, _valueTree_view;
 
+    public:
         DebugPanel(VirtualResonatorsProcessorEditor& e);
+        void resized() override;
+
+    private:
 		void toggleComponentDebugger();
 		void openValueTreeDebugger();
-
-        void resized() override;
     } _debug;
 #endif
 
     VirtualResonatorsAudioProcessor& _audioProcessor;
 
 public:
-
     VirtualResonatorsProcessorEditor (VirtualResonatorsAudioProcessor&);
     ~VirtualResonatorsProcessorEditor() override;
 
