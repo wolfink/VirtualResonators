@@ -134,9 +134,9 @@ VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResona
     _wet_lbl.setText                            ("Wet", NotificationType::dontSendNotification);
     _wet_lbl.attachToComponent                  (&_wet_sld, false);
 
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
 #if(_DEBUG)
+	addAndMakeVisible(_debug);
+
 	setSize(1090, 780);
 #else
     setSize (1040, 780);
@@ -163,17 +163,7 @@ void VirtualResonatorsProcessorEditor::resized()
 	auto area = getLocalBounds();
 
 #if(_DEBUG)
-	FlexBox debug_sidebar;
-	auto debug_width = 50;
-
-	debug_sidebar.flexWrap = FlexBox::Wrap::wrap;
-	debug_sidebar.flexDirection = FlexBox::Direction::column;
-
-	debug_sidebar.items.add(FlexItem(_debug._buffer_view).withHeight(debug_width).withWidth(debug_width));
-	debug_sidebar.items.add(FlexItem(_debug._component_view).withHeight(debug_width).withWidth(debug_width));
-	debug_sidebar.items.add(FlexItem(_debug._valueTree_view).withHeight(debug_width).withWidth(debug_width));
-	debug_sidebar.performLayout(area.removeFromRight(debug_width));
-	//_mono_stereo_cmb.setBounds(getWidth() - section_width - debug_width, getHeight() - 60, section_width, 40);
+	_debug.setBounds(area.removeFromRight(50));
 #endif
 
 	auto header_height = 80;
@@ -268,13 +258,13 @@ VirtualResonatorsProcessorEditor::DebugPanel::DebugPanel(VirtualResonatorsProces
 	juce::Path path;
 	path.addEllipse(50, 200, 50, 50);
 
-	parent.configShapeButton(_buffer_view, "BufferView", path, Colour(128, 0, 0));
+	configShapeButton(_buffer_view, "BufferView", path, Colour(128, 0, 0));
 	_buffer_view.onClick = [this] { parent._audioProcessor.toggleBufferDebugger(); };
 
-	parent.configShapeButton(_component_view, "ComponentView", path, Colour(0, 128, 0));
+	configShapeButton(_component_view, "ComponentView", path, Colour(0, 128, 0));
 	_component_view.onClick = [this] { toggleComponentDebugger(); };
 
-	parent.configShapeButton(_valueTree_view, "ValTreeView", path, Colour(0, 0, 128));
+	configShapeButton(_valueTree_view, "ValTreeView", path, Colour(0, 0, 128));
 	_valueTree_view.onClick = [this] { openValueTreeDebugger(); };
 
 	_componentDebugger.setVisible(false);
@@ -302,5 +292,19 @@ void VirtualResonatorsProcessorEditor::DebugPanel::openValueTreeDebugger()
 		_valueTreeDebugger.setSource(tree);
 		_valueTreeDebugger.setVisible(true);
 	}
+}
+
+void VirtualResonatorsProcessorEditor::DebugPanel::resized()
+{
+	FlexBox debug_sidebar;
+	auto debug_width = 50;
+
+	debug_sidebar.flexWrap = FlexBox::Wrap::wrap;
+	debug_sidebar.flexDirection = FlexBox::Direction::column;
+
+	debug_sidebar.items.add(FlexItem(_buffer_view).withHeight(debug_width).withWidth(debug_width));
+	debug_sidebar.items.add(FlexItem(_component_view).withHeight(debug_width).withWidth(debug_width));
+	debug_sidebar.items.add(FlexItem(_valueTree_view).withHeight(debug_width).withWidth(debug_width));
+	debug_sidebar.performLayout(getLocalBounds());
 }
 #endif

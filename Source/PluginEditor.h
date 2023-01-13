@@ -25,10 +25,14 @@ class VirtualResonatorsComponent : public ComponentClass
 {
 public:
 
-    template<std::enable_if_t<std::is_same<ComponentClass, AudioProcessorEditor>::value, bool> = true>
+    VirtualResonatorsComponent() : ComponentClass() {}
+
+    template<typename CC = ComponentClass,
+        typename std::enable_if_t<std::is_same<CC, AudioProcessorEditor>::value, bool> = true>
     VirtualResonatorsComponent(AudioProcessor& p) : AudioProcessorEditor(p) {}
 
-    template<std::enable_if_t<std::is_same<ComponentClass, AudioProcessorEditor>::value, bool> = true>
+    template<typename CC = ComponentClass,
+        typename std::enable_if_t<std::is_same<CC, AudioProcessorEditor>::value, bool> = true>
     VirtualResonatorsComponent(AudioProcessor* p) : AudioProcessorEditor(p) {}
 
 	void configComboBox(ComboBox& box, StringArray items) {
@@ -117,7 +121,7 @@ class VirtualResonatorsProcessorEditor : public VirtualResonatorsComponent<Audio
 
 
 #if(_DEBUG)
-    struct DebugPanel {
+    struct DebugPanel : public VirtualResonatorsComponent<> {
         VirtualResonatorsProcessorEditor& parent;
 		jcf::ComponentDebugger _componentDebugger;
 		jcf::ValueTreeDebugger _valueTreeDebugger;
@@ -127,6 +131,8 @@ class VirtualResonatorsProcessorEditor : public VirtualResonatorsComponent<Audio
         DebugPanel(VirtualResonatorsProcessorEditor& e);
 		void toggleComponentDebugger();
 		void openValueTreeDebugger();
+
+        void resized() override;
     } _debug;
 #endif
 
