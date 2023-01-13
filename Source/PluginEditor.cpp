@@ -64,8 +64,8 @@ VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResona
 	_mono_stereo_cmb.setSelectedId(1);
 	_mono_stereo_cmb.onChange = [this] {
 		switch (_mono_stereo_cmb.getSelectedId()) {
-			case 1:  _audioProcessor._mono = true;  break;
-			case 2:  _audioProcessor._mono = false; break;
+			case 1:  _audioProcessor._mono = false; break;
+			case 2:  _audioProcessor._mono = true;  break;
 			default: break;
 		}
 	};
