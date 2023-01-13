@@ -56,7 +56,7 @@ AudioProcessorValueTreeState::ParameterLayout createParamLayout() {
     return layout;
 }
 
-ResonatorProjectAudioProcessor::ResonatorProjectAudioProcessor() :
+VirtualResonatorsAudioProcessor::VirtualResonatorsAudioProcessor() :
 #ifndef JucePlugin_PreferredChannelConfigurations
     AudioProcessor(BusesProperties()
 #if ! JucePlugin_IsMidiEffect
@@ -73,17 +73,17 @@ ResonatorProjectAudioProcessor::ResonatorProjectAudioProcessor() :
 {
 }
 
-ResonatorProjectAudioProcessor::~ResonatorProjectAudioProcessor()
+VirtualResonatorsAudioProcessor::~VirtualResonatorsAudioProcessor()
 {
 }
 
 //==============================================================================
-const juce::String ResonatorProjectAudioProcessor::getName() const
+const juce::String VirtualResonatorsAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool ResonatorProjectAudioProcessor::acceptsMidi() const
+bool VirtualResonatorsAudioProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -92,7 +92,7 @@ bool ResonatorProjectAudioProcessor::acceptsMidi() const
    #endif
 }
 
-bool ResonatorProjectAudioProcessor::producesMidi() const
+bool VirtualResonatorsAudioProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -101,7 +101,7 @@ bool ResonatorProjectAudioProcessor::producesMidi() const
    #endif
 }
 
-bool ResonatorProjectAudioProcessor::isMidiEffect() const
+bool VirtualResonatorsAudioProcessor::isMidiEffect() const
 {
    #if JucePlugin_IsMidiEffect
     return true;
@@ -110,37 +110,37 @@ bool ResonatorProjectAudioProcessor::isMidiEffect() const
    #endif
 }
 
-double ResonatorProjectAudioProcessor::getTailLengthSeconds() const
+double VirtualResonatorsAudioProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int ResonatorProjectAudioProcessor::getNumPrograms()
+int VirtualResonatorsAudioProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int ResonatorProjectAudioProcessor::getCurrentProgram()
+int VirtualResonatorsAudioProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void ResonatorProjectAudioProcessor::setCurrentProgram (int index)
+void VirtualResonatorsAudioProcessor::setCurrentProgram (int index)
 {
 }
 
-const juce::String ResonatorProjectAudioProcessor::getProgramName (int index)
+const juce::String VirtualResonatorsAudioProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void ResonatorProjectAudioProcessor::changeProgramName (int index, const juce::String& newName)
+void VirtualResonatorsAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
 }
 
 //==============================================================================
-void ResonatorProjectAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+void VirtualResonatorsAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     for (int index = 0; index < NUM_RESONATORS; index++) {
         _resonators[index].setFrequency(440.0);
@@ -151,14 +151,14 @@ void ResonatorProjectAudioProcessor::prepareToPlay(double sampleRate, int sample
     }
 }
 
-void ResonatorProjectAudioProcessor::releaseResources()
+void VirtualResonatorsAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool ResonatorProjectAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool VirtualResonatorsAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
     juce::ignoreUnused (layouts);
@@ -184,7 +184,7 @@ bool ResonatorProjectAudioProcessor::isBusesLayoutSupported (const BusesLayout& 
 #endif
 
 
-void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void VirtualResonatorsAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
     auto num_input_channels  = getTotalNumInputChannels();
@@ -278,18 +278,18 @@ void ResonatorProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 }
 
 //==============================================================================
-bool ResonatorProjectAudioProcessor::hasEditor() const
+bool VirtualResonatorsAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* ResonatorProjectAudioProcessor::createEditor()
+juce::AudioProcessorEditor* VirtualResonatorsAudioProcessor::createEditor()
 {
-    return new ResonatorProjectAudioProcessorEditor (*this);
+    return new VirtualResonatorsProcessorEditor (*this);
 }
 
 //==============================================================================
-void ResonatorProjectAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void VirtualResonatorsAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
@@ -299,7 +299,7 @@ void ResonatorProjectAudioProcessor::getStateInformation (juce::MemoryBlock& des
     destData.copyFrom((void *) xml.toRawUTF8(), 0, xml.length());
 }
 
-void ResonatorProjectAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void VirtualResonatorsAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
@@ -311,17 +311,17 @@ void ResonatorProjectAudioProcessor::setStateInformation (const void* data, int 
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new ResonatorProjectAudioProcessor();
+    return new VirtualResonatorsAudioProcessor();
 }
 
 //==============================================================================
-void ResonatorProjectAudioProcessor::pluckResonator(int index)
+void VirtualResonatorsAudioProcessor::pluckResonator(int index)
 {
 	_resonators[index].pluck();
 }
 
 #if(_DEBUG)
-void ResonatorProjectAudioProcessor::toggleBufferDebugger()
+void VirtualResonatorsAudioProcessor::toggleBufferDebugger()
 {
     if (!bufferDebuggerOn) bufferDebugger = new jcf::BufferDebugger();
     else delete bufferDebugger;

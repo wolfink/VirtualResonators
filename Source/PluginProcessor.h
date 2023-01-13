@@ -48,7 +48,7 @@ const StringArray notevals = { "C", "C#/Db", "D", "D#/Eb",
 
 class DCBlocker;
 
-class ResonatorProjectAudioProcessor : public AudioProcessor
+class VirtualResonatorsAudioProcessor : public AudioProcessor
 {
     //==============================================================================
     std::vector<StringModel> _resonators;
@@ -60,8 +60,8 @@ public:
     bool _mono;
 
     //==============================================================================
-    ResonatorProjectAudioProcessor();
-    ~ResonatorProjectAudioProcessor() override;
+    VirtualResonatorsAudioProcessor();
+    ~VirtualResonatorsAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
@@ -111,7 +111,7 @@ private:
 #endif
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResonatorProjectAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VirtualResonatorsAudioProcessor)
 };
 
 class DCBlocker {
