@@ -88,6 +88,10 @@ class VirtualResonatorsProcessorEditor : public VirtualResonatorsComponent<Audio
 		ComboBox    _noteval_cmb, _octave_cmb;
         Slider      _detune_sld, _decay_sld, _volume_sld, _damping_sld;
 		VRShapeButton _pluck_btn, _toggle_btn;
+		uptr<AudioProcessorValueTreeState::ComboBoxAttachment> _noteval_attachments, _octave_attachments;
+		uptr<AudioProcessorValueTreeState::SliderAttachment>
+			_detune_attachments, _decay_attachments, _damping_attachments, _volume_attachments;
+		uptr<AudioProcessorValueTreeState::ButtonAttachment> _toggle_attachments;
 
         ResonatorControl();
         void initialize(VirtualResonatorsProcessorEditor* e, int index);
@@ -113,14 +117,6 @@ class VirtualResonatorsProcessorEditor : public VirtualResonatorsComponent<Audio
     ComboBox _mono_stereo_cmb;
 
     // Paramter Attachments
-    std::vector<uptr<AudioProcessorValueTreeState::ComboBoxAttachment>> 
-        _noteval_attachments, _octave_attachments;
-
-    std::vector<uptr<AudioProcessorValueTreeState::SliderAttachment>>
-        _detune_attachments, _decay_attachments, _damping_attachments, _volume_attachments;
-
-    std::vector<uptr<AudioProcessorValueTreeState::ButtonAttachment>>
-        _toggle_attachments;
 
     uptr<AudioProcessorValueTreeState::SliderAttachment>
         _in_attachment, _wet_attachment, _out_attachment;
