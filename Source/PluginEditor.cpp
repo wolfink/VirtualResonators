@@ -16,7 +16,7 @@
 
 //==============================================================================
 VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResonatorsAudioProcessor& p)
-	: VirtualResonatorsComponent(&p), _audioProcessor(p), _debug(*this)
+	: VirtualResonatorsComponent(&p), _audioProcessor(p), _debug(*this), _preset_control(*this)
 {
     // Set parameters for volume and mix sliders
 	configVertSlider(_out_sld, -100.0,  12.0, 0.1);
@@ -214,18 +214,31 @@ void VirtualResonatorsProcessorEditor::ResonatorControl::resized()
 	resonator_flex.performLayout(getLocalBounds());
 }
 
-VirtualResonatorsProcessorEditor::PresetControl::PresetControl()
+VirtualResonatorsProcessorEditor::PresetControl::PresetControl(VirtualResonatorsProcessorEditor& e) :
+	_parent(e)
 {
+	_directory = File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile)
+		.getParentDirectory()
+		.getParentDirectory()
+		.getChildFile("Resources")
+		.getChildFile("Presets");
+
 	Path preset_btn_shape;
 	preset_btn_shape.addTriangle(0, 10, 20, 20, 20, 0);
 
 	configShapeButton(_left_btn , "LeftPre" , preset_btn_shape, Colour(128, 128, 128));
+	_left_btn.onClick = [this] { prev_preset(); };
 
 	preset_btn_shape.applyTransform(AffineTransform::rotation(MathConstants<float>::pi));
 	configShapeButton(_right_btn, "RightPre", preset_btn_shape, Colour(128, 128, 128));
+	_right_btn.onClick = [this] { next_preset(); };
 
-	configComboBox(_preset_name, { "Empty" });
+	configComboBox(_preset_name, get_preset_list());
+	_preset_name.setEditableText(true);
+	_preset_name.onChange = [this] { load_preset(); };
+
 	configTextButton(_save_btn, "Save");
+	_save_btn.onClick = [this] { save_preset(); };
 }
 
 void VirtualResonatorsProcessorEditor::PresetControl::resized()
@@ -250,6 +263,50 @@ void VirtualResonatorsProcessorEditor::PresetControl::resized()
 		.withHeight(preset_height)
 		.withMargin(FlexItem::Margin(0, 0, 0, 10)));
 	preset_bar.performLayout(getLocalBounds());
+}
+
+void VirtualResonatorsProcessorEditor::PresetControl::prev_preset()
+{
+	int prev_id = _preset_name.getSelectedId() - 1;
+	prev_id = (prev_id < 1) ? _preset_name.getNumItems() : prev_id;
+	_preset_name.setSelectedId(prev_id);
+}
+
+void VirtualResonatorsProcessorEditor::PresetControl::next_preset()
+{
+	int next_id = _preset_name.getSelectedId() + 1;
+	next_id = (next_id > _preset_name.getNumItems()) ? 1 : next_id;
+	_preset_name.setSelectedId(next_id);
+}
+
+void VirtualResonatorsProcessorEditor::PresetControl::load_preset()
+{
+	File file = File(_directory.getFullPathName() + "\\" + _preset_name.getText() + ".vrpst");
+	if (file.exists()) {
+		String preset_data = file.loadFileAsString();
+		_parent._audioProcessor.setStateInformation((void*) preset_data.toRawUTF8(), preset_data.length());
+	}
+}
+
+void VirtualResonatorsProcessorEditor::PresetControl::save_preset()
+{
+	MemoryBlock state_info;
+	_parent._audioProcessor.getStateInformation(state_info);
+	String preset_data = String((char*)state_info.getData(), state_info.getSize());
+	String file_name = _directory.getFullPathName() + "\\" + _preset_name.getText() + ".vrpst";
+	File file(file_name);
+	file.replaceWithText(preset_data);
+	_preset_name.clear(dontSendNotification);
+	_preset_name.addItemList(get_preset_list(), 1);
+}
+
+StringArray VirtualResonatorsProcessorEditor::PresetControl::get_preset_list()
+{
+	Array<File> files;
+	StringArray file_names;
+	_directory.findChildFiles(files, File::TypesOfFileToFind::findFiles, true, "*.vrpst");
+	for (File f : files) file_names.add(f.getFileNameWithoutExtension());
+	return file_names;
 }
 
 #if(_DEBUG)

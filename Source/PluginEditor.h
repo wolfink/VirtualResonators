@@ -101,12 +101,21 @@ class VirtualResonatorsProcessorEditor : public VirtualResonatorsComponent<Audio
     class PresetControl : public VirtualResonatorsComponent<>
     {
         VRShapeButton _left_btn, _right_btn;
-        TextButton  _save_btn, _delete_btn;
-        ComboBox    _preset_name;
+        TextButton    _save_btn, _delete_btn;
+        ComboBox      _preset_name;
+        File          _directory;
+
+        VirtualResonatorsProcessorEditor& _parent;
 
     public:
-        PresetControl();
+        PresetControl(VirtualResonatorsProcessorEditor &e);
         void resized() override;
+    private:
+        void prev_preset();
+        void next_preset();
+        void load_preset();
+        void save_preset();
+        StringArray get_preset_list();
     } _preset_control;
 
     // I/O components
