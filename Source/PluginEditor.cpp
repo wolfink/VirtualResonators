@@ -13,42 +13,11 @@
 VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResonatorsAudioProcessor& p)
 	: VirtualResonatorsComponent(&p), _audioProcessor(p), _debug(*this)
 {
-
-    // Useful variables
-	juce::Path path;
-	path.addEllipse(50, 200, 50, 50);
-
-    // Set parameters for resonator components
-    for (int i = 0; i < NUM_RESONATORS; i++) {
-		ResonatorControl& res = _res_controls[i];
-
-		configComboBox(res._noteval_cmb, notevals);
-
-		res._lbl.setText          (std::to_string(i + 1), NotificationType::dontSendNotification);
-		res._lbl.attachToComponent(&res._noteval_cmb, false);
-
-		configComboBox(res._octave_cmb, { "0", "1", "2", "3", "4", "5", "6", "7", "8" });
-
-		configRotarySlider(res._detune_sld, -100.0, 100.0, 1.0);
-		configRotarySlider(res._decay_sld, 0.0, 100.0, 0.1);
-		configRotarySlider(res._damping_sld, 0.0, 100.0, 0.1);
-		configRotarySlider(res._volume_sld, 0.0, 10.0, 0.01);
-
-		configShapeButton(res._pluck_btn , "Pluck" , path, Colour(128, 128, 128));
-		res._pluck_btn.onClick = [this, i] { _audioProcessor.pluckResonator(i); };
-
-		configShapeButton(res._toggle_btn, "On/Off", path, Colour(30, 0, 0), false);
-		res._toggle_btn.setOnColours(
-			Colour(128, 0, 0),
-			Colour(128, 0, 0),
-			Colour(128, 0, 0)
-		);
-		res._toggle_btn.shouldUseOnColours     (true);
-		res._toggle_btn.setShape               (path, false, false, false);
-		res._toggle_btn.setToggleable          (true);
-		res._toggle_btn.setClickingTogglesState(true);
-		res._toggle_btn.setToggleState         (true, NotificationType::dontSendNotification);
-    }
+    // Initialize and add resonator controls
+	for (int i = 0; i < NUM_RESONATORS; i++) {
+		_res_controls[i].initialize(this, i);
+		addAndMakeVisible(_res_controls[i]);
+	}
 
     // Set parameters for volume and mix sliders
 	configVertSlider(_out_sld, -100.0,  12.0, 0.1);
@@ -184,42 +153,84 @@ void VirtualResonatorsProcessorEditor::resized()
 	_wet_sld.setBounds(area.removeFromRight(section_width));
 
 	area.removeFromLeft(section_width); // space for resonator component labels
-	FlexBox resonator_sections[NUM_RESONATORS];
 	for (int i = 0; i < NUM_RESONATORS; i++) {
-		ResonatorControl& res = _res_controls[i];
-
-		resonator_sections[i].flexWrap = FlexBox::Wrap::wrap;
-		resonator_sections[i].flexDirection = FlexBox::Direction::column;
-		resonator_sections[i].justifyContent = FlexBox::JustifyContent::spaceBetween;
-
-		resonator_sections[i].items.add(FlexItem(res._noteval_cmb)
-			.withWidth(section_width)
-			.withHeight(combo_height));
-		resonator_sections[i].items.add(FlexItem(res._octave_cmb)
-			.withWidth(section_width)
-			.withHeight(combo_height));
-		resonator_sections[i].items.add(FlexItem(res._detune_sld)
-			.withWidth(section_width)
-			.withHeight(section_width));
-		resonator_sections[i].items.add(FlexItem(res._decay_sld)
-			.withWidth(section_width)
-			.withHeight(section_width));
-		resonator_sections[i].items.add(FlexItem(res._damping_sld)
-			.withWidth(section_width)
-			.withHeight(section_width));
-		resonator_sections[i].items.add(FlexItem(res._volume_sld)
-			.withWidth(section_width)
-			.withHeight(section_width));
-		resonator_sections[i].items.add(FlexItem(res._pluck_btn)
-			.withWidth(section_width)
-			.withHeight(section_width));
-		resonator_sections[i].items.add(FlexItem(res._toggle_btn)
-			.withWidth(section_width)
-			.withHeight(section_width));
-		resonator_sections[i].performLayout(area.removeFromLeft(section_width));
-
+		_res_controls[i].setBounds(area.removeFromLeft(section_width));
 		if (i < NUM_RESONATORS - 1) area.removeFromLeft(section_pad);
 	}
+}
+
+VirtualResonatorsProcessorEditor::ResonatorControl::ResonatorControl()
+{
+	configComboBox(_noteval_cmb, notevals);
+	configComboBox(_octave_cmb, { "0", "1", "2", "3", "4", "5", "6", "7", "8" });
+	configRotarySlider(_detune_sld, -100.0, 100.0, 1.0);
+	configRotarySlider(_decay_sld, 0.0, 100.0, 0.1);
+	configRotarySlider(_damping_sld, 0.0, 100.0, 0.1);
+	configRotarySlider(_volume_sld, 0.0, 10.0, 0.01);
+}
+
+void VirtualResonatorsProcessorEditor::ResonatorControl::initialize(VirtualResonatorsProcessorEditor* e, int index)
+{
+	_parent = e;
+	_lbl.setText          (std::to_string(index + 1), NotificationType::dontSendNotification);
+	_lbl.attachToComponent(&_noteval_cmb, false);
+
+	juce::Path path;
+	path.addEllipse(50, 200, 50, 50);
+
+	// Configure ShapeButtons
+	configShapeButton(_pluck_btn , "Pluck" , path, Colour(128, 128, 128));
+	_pluck_btn.onClick = [this, index] { _parent->_audioProcessor.pluckResonator(index); };
+
+	configShapeButton(_toggle_btn, "On/Off", path, Colour(30, 0, 0), false);
+	_toggle_btn.setOnColours(
+		Colour(128, 0, 0),
+		Colour(128, 0, 0),
+		Colour(128, 0, 0)
+	);
+	_toggle_btn.shouldUseOnColours     (true);
+	_toggle_btn.setShape               (path, false, false, false);
+	_toggle_btn.setToggleable          (true);
+	_toggle_btn.setClickingTogglesState(true);
+	_toggle_btn.setToggleState         (true, NotificationType::dontSendNotification);
+}
+
+void VirtualResonatorsProcessorEditor::ResonatorControl::resized()
+{
+	auto diameter = getLocalBounds().getWidth();
+	auto combo_height  = 20;
+
+	FlexBox resonator_flex;
+
+	resonator_flex.flexWrap = FlexBox::Wrap::wrap;
+	resonator_flex.flexDirection = FlexBox::Direction::column;
+	resonator_flex.justifyContent = FlexBox::JustifyContent::spaceBetween;
+
+	resonator_flex.items.add(FlexItem(_noteval_cmb)
+		.withWidth(diameter)
+		.withHeight(combo_height));
+	resonator_flex.items.add(FlexItem(_octave_cmb)
+		.withWidth(diameter)
+		.withHeight(combo_height));
+	resonator_flex.items.add(FlexItem(_detune_sld)
+		.withWidth(diameter)
+		.withHeight(diameter));
+	resonator_flex.items.add(FlexItem(_decay_sld)
+		.withWidth(diameter)
+		.withHeight(diameter));
+	resonator_flex.items.add(FlexItem(_damping_sld)
+		.withWidth(diameter)
+		.withHeight(diameter));
+	resonator_flex.items.add(FlexItem(_volume_sld)
+		.withWidth(diameter)
+		.withHeight(diameter));
+	resonator_flex.items.add(FlexItem(_pluck_btn)
+		.withWidth(diameter)
+		.withHeight(diameter));
+	resonator_flex.items.add(FlexItem(_toggle_btn)
+		.withWidth(diameter)
+		.withHeight(diameter));
+	resonator_flex.performLayout(getLocalBounds());
 }
 
 VirtualResonatorsProcessorEditor::PresetControl::PresetControl()

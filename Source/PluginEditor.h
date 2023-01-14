@@ -80,12 +80,18 @@ private:
 
 class VirtualResonatorsProcessorEditor : public VirtualResonatorsComponent<AudioProcessorEditor>
 {
-    struct ResonatorControl
+    class ResonatorControl : public VirtualResonatorsComponent<>
     {
+        VirtualResonatorsProcessorEditor* _parent;
+    public:
         Label       _lbl;
 		ComboBox    _noteval_cmb, _octave_cmb;
         Slider      _detune_sld, _decay_sld, _volume_sld, _damping_sld;
 		VRShapeButton _pluck_btn, _toggle_btn;
+
+        ResonatorControl();
+        void initialize(VirtualResonatorsProcessorEditor* e, int index);
+        void resized() override;
     } _res_controls[NUM_RESONATORS];
 
     class PresetControl : public VirtualResonatorsComponent<>
