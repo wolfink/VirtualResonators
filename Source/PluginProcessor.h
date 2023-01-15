@@ -12,7 +12,7 @@
 #include "StringModel.h"
 #include "VirtualResonators.h"
 
-#define NUM_RESONATORS 8
+#define NUM_RESONATORS 12
 
 // Names and IDs for parameters
 #define    NOTEVAL_ID(index) "note value "          + std::to_string(index)

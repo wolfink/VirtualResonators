@@ -64,9 +64,9 @@ VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResona
 	SET_AND_ATTACH_LABEL(_wet_lbl, &_wet_sld, "Mix", false);
 
 #if(_DEBUG)
-	setSize(1090, 780);
+	setSize(1450, 1000);
 #else
-    setSize (1040, 780);
+    setSize (1400, 1000);
 #endif
 }
 
@@ -88,8 +88,8 @@ void VirtualResonatorsProcessorEditor::paint (juce::Graphics& g)
 void VirtualResonatorsProcessorEditor::resized()
 {
 	auto area = getLocalBounds();
-	auto header_height = 80;
-	auto footer_height = 80;
+	auto header_height = 100;
+	auto footer_height = 180;
 	auto section_width = 80;
 	auto section_pad   = 10;
 	auto combo_height  = 20;
@@ -189,7 +189,8 @@ void VirtualResonatorsProcessorEditor::ResonatorControl::resized()
 
 	resonator_flex.items.add(FlexItem(_noteval_cmb)
 		.withWidth(diameter)
-		.withHeight(combo_height));
+		.withHeight(combo_height)
+		.withMargin(FlexItem::Margin(30, 0, 0, 0)));
 	resonator_flex.items.add(FlexItem(_octave_cmb)
 		.withWidth(diameter)
 		.withHeight(combo_height));
@@ -282,19 +283,28 @@ void VirtualResonatorsProcessorEditor::PresetControl::next_preset()
 void VirtualResonatorsProcessorEditor::PresetControl::load_preset()
 {
 	File file = File(_directory.getFullPathName() + "\\" + _preset_name.getText() + ".vrpst");
+
+	// If file exist, load it, otherwise refresh the item list for the combo box
 	if (file.exists()) {
 		String preset_data = file.loadFileAsString();
 		_parent._audioProcessor.setStateInformation((void*) preset_data.toRawUTF8(), preset_data.length());
+	}
+	else {
+		_preset_name.clear();
+		_preset_name.addItemList(get_preset_list(), 1);
 	}
 }
 
 void VirtualResonatorsProcessorEditor::PresetControl::save_preset()
 {
+	if (_preset_name.getText().length() < 1) return;
+
 	MemoryBlock state_info;
 	_parent._audioProcessor.getStateInformation(state_info);
 	String preset_data = String((char*)state_info.getData(), state_info.getSize());
 	String file_name = _directory.getFullPathName() + "\\" + _preset_name.getText() + ".vrpst";
 	File file(file_name);
+
 	file.replaceWithText(preset_data);
 	_preset_name.clear(dontSendNotification);
 	_preset_name.addItemList(get_preset_list(), 1);

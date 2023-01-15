@@ -14,12 +14,18 @@ AudioProcessorValueTreeState::ParameterLayout createParamLayout() {
     AudioProcessorValueTreeState::ParameterLayout layout;
 
     // Important constant variables
-	const int            default_note_indexes[NUM_RESONATORS] = {    0,    2,    4,    5,    7,    9,   11,    0 };
-	const int         default_register_values[NUM_RESONATORS] = {    4,    4,    4,    4,    4,    4,    4,    5 };
-	const float         default_detune_values[NUM_RESONATORS] = {  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0 };
-	const float          default_decay_values[NUM_RESONATORS] = { 50.0, 50.0, 50.0, 50.0, 50.0, 50.0, 50.0, 50.0 };
-	const float        default_damping_values[NUM_RESONATORS] = { 50.0, 50.0, 50.0, 50.0, 50.0, 50.0, 50.0, 50.0 };
-	const float         default_volume_values[NUM_RESONATORS] = {   10,   10,   10,   10,   10,   10,   10,   10 };
+	const int            default_note_indexes[NUM_RESONATORS] = {    0,    2,    4,    5,    7,    9,
+                                                                    11,    0,    2,    4,    5,    7 };
+	const int         default_register_values[NUM_RESONATORS] = {    4,    4,    4,    4,    4,    4,
+                                                                     4,    5,    5,    5,    5,    5 };
+	const float         default_detune_values[NUM_RESONATORS] = {  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                                                   0.0,  0.0,  0.0,  0.0,  0.0,  0.0 };
+	const float          default_decay_values[NUM_RESONATORS] = { 50.0, 50.0, 50.0, 50.0, 50.0, 50.0,
+                                                                  50.0, 50.0, 50.0, 50.0, 50.0, 50.0 };
+	const float        default_damping_values[NUM_RESONATORS] = { 50.0, 50.0, 50.0, 50.0, 50.0, 50.0,
+                                                                  50.0, 50.0, 50.0, 50.0, 50.0, 50.0 };
+	const float         default_volume_values[NUM_RESONATORS] = {   10,   10,   10,   10,   10,   10,
+                                                                    10,   10,   10,   10,   10,   10 };
 	const float          default_input_volume                 = 0.0;
 	const float                   default_wet                 = 50.0;
 	const float         default_output_volume                 = 0.0;
@@ -304,7 +310,16 @@ void VirtualResonatorsAudioProcessor::setStateInformation (const void* data, int
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
     ValueTree new_state = ValueTree().fromXml(*parseXML(String((char*)data, sizeInBytes)));
-    _parameters.state.copyPropertiesAndChildrenFrom(new_state, nullptr);
+
+    for (ValueTree child : new_state) {
+        auto id    = child.getProperty("id");
+        auto value = child.getProperty("value");
+
+        _parameters.state
+            .getChildWithProperty("id", id)
+            .setProperty("value", value, nullptr);
+    }
+    //_parameters.state.copyPropertiesAndChildrenFrom(new_state, nullptr);
 }
 
 //==============================================================================
