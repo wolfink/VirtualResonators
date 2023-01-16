@@ -13,3 +13,4 @@ Logs/
 *.filtergraph
 /roadmap.txt
 *.vst3
+.DS_Store

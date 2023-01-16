@@ -15,8 +15,12 @@
 }
 
 //==============================================================================
-VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResonatorsAudioProcessor& p)
-	: VirtualResonatorsComponent(&p), _audioProcessor(p), _debug(*this), _preset_control(*this)
+VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResonatorsAudioProcessor& p): VirtualResonatorsComponent(&p),
+    _preset_control(*this),
+#if(_DEBUG)
+    _debug(*this),
+#endif
+    _audioProcessor(p)
 {
     // Set parameters for volume and mix sliders
 	configVertSlider(_out_sld, -100.0,  12.0, 0.1);
@@ -282,7 +286,7 @@ void VirtualResonatorsProcessorEditor::PresetControl::next_preset()
 
 void VirtualResonatorsProcessorEditor::PresetControl::load_preset()
 {
-	File file = File(_directory.getFullPathName() + "\\" + _preset_name.getText() + ".vrpst");
+	File file = File(_directory.getFullPathName() + SLASH + _preset_name.getText() + ".vrpst");
 
 	// If file exist, load it, otherwise refresh the item list for the combo box
 	if (file.exists()) {
@@ -302,8 +306,9 @@ void VirtualResonatorsProcessorEditor::PresetControl::save_preset()
 	MemoryBlock state_info;
 	_parent._audioProcessor.getStateInformation(state_info);
 	String preset_data = String((char*)state_info.getData(), state_info.getSize());
-	String file_name = _directory.getFullPathName() + "\\" + _preset_name.getText() + ".vrpst";
+	String file_name = _directory.getFullPathName() + SLASH + _preset_name.getText() + ".vrpst";
 	File file(file_name);
+    if (!file.exists()) file.create();
 
 	file.replaceWithText(preset_data);
 	_preset_name.clear(dontSendNotification);

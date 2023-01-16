@@ -34,7 +34,7 @@ struct VirtualResonatorsComponent : public ComponentClass
 
 	void configComboBox(ComboBox& box, StringArray items) {
         box.addItemList(items, 1);
-        addAndMakeVisible(box);
+        this->addAndMakeVisible(box);
 	}
 
 	void configRotarySlider(Slider& slider, float low, float high, float step) {
@@ -61,12 +61,12 @@ struct VirtualResonatorsComponent : public ComponentClass
 
         button.setName(name);
         button.setShape(path, false, false, false);
-        addAndMakeVisible(button);
+        this->addAndMakeVisible(button);
 	}
 
     void configTextButton(TextButton& button, String text) {
         button.setButtonText(text);
-        addAndMakeVisible(button);
+        this->addAndMakeVisible(button);
     }
 
 private:
@@ -74,7 +74,7 @@ private:
 		slider.setRange                 (low, high, step);
 		slider.setPopupDisplayEnabled   (true, false, this);
 		slider.setTextBoxStyle          (Slider::NoTextBox, false, 90, 0);
-		addAndMakeVisible(slider);
+		this->addAndMakeVisible(slider);
     }
 };
 
