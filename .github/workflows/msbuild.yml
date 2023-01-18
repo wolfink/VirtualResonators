@@ -46,7 +46,7 @@ jobs:
     - name: Generate solution file
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        copy /Y .\Misc\MacOS\font_and_colour_designer.cpp .\modules\juce-toys\jcf_debug\source\
+        copy ".\Misc\MacOS\font_and_colour_designer.cpp" -Destination ".\modules\juce-toys\jcf_debug\source\"
         ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .\modules
         ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .\JUCE\modules
         ${{env.PROJUCER_EXE_FILE_PATH}} --resave VirtualResonators.jucer
