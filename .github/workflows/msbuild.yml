@@ -36,7 +36,8 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         git clone https://github.com/juce-framework/JUCE.git
-        mkdir modules && cd modules
+        mkdir modules
+        cd modules
         git clone https://github.com/jcredland/juce-toys.git
       
     - name: Build Projucer
