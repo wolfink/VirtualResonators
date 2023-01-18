@@ -38,7 +38,7 @@ jobs:
       
     - name: Build Projucer
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /m /p:Configuration=Release ${{env.PROJUCER_SOLUTION_FILE_PATH}}
+      run: msbuild /m /p:Configuration=Release ${{env.PROJUCER_SOLUTION_FILE_PATH}}\Projucer.sln
       
     - name: Set User Modules path
       working-directory: ${{env.GITHUB_WORKSPACE}}
