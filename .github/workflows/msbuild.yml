@@ -12,7 +12,7 @@ env:
   
   # Projucer path relative to the root of the project
   PROJUCER_SOLUTION_FILE_PATH: .\JUCE\extras\Projucer\Builds\VisualStudio2019
-  PROJUCER_EXE_FILE_PATH: PROJUCER_SOLUTION_FILE_PATH\x64\Release\App\Projucer.exe
+  PROJUCER_EXE_FILE_PATH: ${{PROJUCER_SOLUTION_FILE_PATH}}\x64\Release\App\Projucer.exe
 
   # Configuration type to build.
   # You can convert this to a build matrix if you need coverage of multiple configuration types.
