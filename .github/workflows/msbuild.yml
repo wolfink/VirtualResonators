@@ -43,15 +43,13 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: msbuild /m /p:Configuration=Release ${{env.PROJUCER_SOLUTION_FILE_PATH}}\Projucer.sln
       
-    - name: Set module paths
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .\modules
-        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .\JUCE\modules
-      
     - name: Generate solution file
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: ${{env.PROJUCER_EXE_FILE_PATH}} --resave VirtualResonators.jucer
+      run: |
+        copy /Y .\Misc\MacOS\font_and_colour_designer.cpp .\modules\juce-toys\jcf_debug\source\
+        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .\modules
+        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .\JUCE\modules
+        ${{env.PROJUCER_EXE_FILE_PATH}} --resave VirtualResonators.jucer
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
