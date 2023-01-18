@@ -34,7 +34,10 @@ jobs:
       
     - name: Get Dependencies
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: git clone https://github.com/juce-framework/JUCE.git && git clone https://github.com/jcredland/juce-toys.git
+      run: |
+        git clone https://github.com/juce-framework/JUCE.git
+        mkdir modules && cd modules
+        git clone https://github.com/jcredland/juce-toys.git
       
     - name: Build Projucer
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -43,8 +46,8 @@ jobs:
     - name: Set module paths
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .
-        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .
+        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .\JUCE\modules
+        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .\modules
       
     - name: Generate solution file
       working-directory: ${{env.GITHUB_WORKSPACE}}
