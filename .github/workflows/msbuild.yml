@@ -48,13 +48,12 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         copy ".\Misc\MacOS\font_and_colour_designer.cpp" -Destination ".\modules\juce-toys\jcf_debug\source\"
-        ls .\JUCE\
-        ls .\modules
-        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .\modules
-        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .\JUCE\modules
-        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .\modules
-        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .\JUCE\modules
+        ls .\JUCE\modules\
+        ls .\modules\
+        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .\modules\
+        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .\JUCE\modules\
         ${{env.PROJUCER_EXE_FILE_PATH}} --resave .\VirtualResonators.jucer
+        ls .\Builds\
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
