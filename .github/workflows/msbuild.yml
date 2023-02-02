@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -48,6 +48,11 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         copy ".\Misc\MacOS\font_and_colour_designer.cpp" -Destination ".\modules\juce-toys\jcf_debug\source\"
+        ls .
+        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .\modules
+        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .\JUCE\modules
+        ${{env.PROJUCER_EXE_FILE_PATH}} --resave VirtualResonators.jucer
+        
         ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .\modules
         ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .\JUCE\modules
         ${{env.PROJUCER_EXE_FILE_PATH}} --resave VirtualResonators.jucer
