@@ -51,11 +51,8 @@ jobs:
         ls .
         ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .\modules
         ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .\JUCE\modules
-        ${{env.PROJUCER_EXE_FILE_PATH}} --resave VirtualResonators.jucer
-        
-        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultUserModulePath .\modules
-        ${{env.PROJUCER_EXE_FILE_PATH}} --set-global-search-path windows defaultJuceModulePath .\JUCE\modules
-        ${{env.PROJUCER_EXE_FILE_PATH}} --resave VirtualResonators.jucer
+        ${{env.PROJUCER_EXE_FILE_PATH}} --status .\VirtualResonators.jucer
+        ${{env.PROJUCER_EXE_FILE_PATH}} --resave .\VirtualResonators.jucer
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
