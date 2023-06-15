@@ -134,25 +134,6 @@ class VirtualResonatorsProcessorEditor : public VirtualResonatorsComponent<Audio
     Label _noteval_lbl, _octave_lbl, _detune_lbl, _decay_lbl, _damping_lbl,
         _volume_lbl, _in_lbl, _wet_lbl, _out_lbl;
 
-
-#if(_DEBUG)
-    class DebugPanel : public VirtualResonatorsComponent<>
-    {
-        VirtualResonatorsProcessorEditor& parent;
-		jcf::ComponentDebugger _componentDebugger;
-		jcf::ValueTreeDebugger _valueTreeDebugger;
-		VRShapeButton _buffer_view, _component_view, _valueTree_view;
-
-    public:
-        DebugPanel(VirtualResonatorsProcessorEditor& e);
-        void resized() override;
-
-    private:
-		void toggleComponentDebugger();
-		void openValueTreeDebugger();
-    } _debug;
-#endif
-
     VirtualResonatorsAudioProcessor& _audioProcessor;
 
 public:

@@ -17,9 +17,6 @@
 //==============================================================================
 VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResonatorsAudioProcessor& p): VirtualResonatorsComponent(&p),
     _preset_control(*this),
-#if(_DEBUG)
-    _debug(*this),
-#endif
     _audioProcessor(p)
 {
     // Set parameters for volume and mix sliders
@@ -53,9 +50,6 @@ VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResona
 		addAndMakeVisible(_res_controls[i]);
 	}
 	addAndMakeVisible(_preset_control);
-#if(_DEBUG)
-	addAndMakeVisible(_debug);
-#endif
 
 	SET_AND_ATTACH_LABEL(_noteval_lbl, &_res_controls[0]._noteval_cmb, "Note"   , true);
 	SET_AND_ATTACH_LABEL(_octave_lbl , &_res_controls[0]._octave_cmb , "Octave" , true);
@@ -67,11 +61,7 @@ VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResona
 	SET_AND_ATTACH_LABEL(_in_lbl , &_in_sld , "In" , false);
 	SET_AND_ATTACH_LABEL(_wet_lbl, &_wet_sld, "Mix", false);
 
-#if(_DEBUG)
-	setSize(1450, 1000);
-#else
-    setSize (1400, 1000);
-#endif
+  setSize (1400, 1000);
 }
 
 VirtualResonatorsProcessorEditor::~VirtualResonatorsProcessorEditor()
@@ -97,10 +87,6 @@ void VirtualResonatorsProcessorEditor::resized()
 	auto section_width = 80;
 	auto section_pad   = 10;
 	auto combo_height  = 20;
-
-#if(_DEBUG)
-	_debug.setBounds(area.removeFromRight(50));
-#endif
 
 	area.removeFromTop(header_height);
 
@@ -323,63 +309,3 @@ StringArray VirtualResonatorsProcessorEditor::PresetControl::get_preset_list()
 	for (File f : files) file_names.add(f.getFileNameWithoutExtension());
 	return file_names;
 }
-
-#if(_DEBUG)
-using namespace jcf;
-VirtualResonatorsProcessorEditor::DebugPanel::DebugPanel(VirtualResonatorsProcessorEditor& e) :
-            parent(e),
-            _componentDebugger(&parent)
-{
-	juce::Path path;
-	path.addEllipse(50, 200, 50, 50);
-
-	configShapeButton(_buffer_view, "BufferView", path, Colour(128, 0, 0));
-	_buffer_view.onClick = [this] { parent._audioProcessor.toggleBufferDebugger(); };
-
-	configShapeButton(_component_view, "ComponentView", path, Colour(0, 128, 0));
-	_component_view.onClick = [this] { toggleComponentDebugger(); };
-
-	configShapeButton(_valueTree_view, "ValTreeView", path, Colour(0, 0, 128));
-	_valueTree_view.onClick = [this] { openValueTreeDebugger(); };
-
-	_componentDebugger.setVisible(false);
-	_valueTreeDebugger.setVisible(false);
-};
-
-void VirtualResonatorsProcessorEditor::DebugPanel::toggleComponentDebugger()
-{
-	if (_componentDebugger.isVisible()) _componentDebugger.closeButtonPressed();
-	else _componentDebugger.setVisible(true);
-}
-
-void VirtualResonatorsProcessorEditor::DebugPanel::openValueTreeDebugger()
-{
-	if (_valueTreeDebugger.isVisible()) {
-		_valueTreeDebugger.closeButtonPressed();
-	}
-	else {
-		MemoryBlock stateInfo;
-		parent._audioProcessor.getStateInformation(stateInfo);
-
-		String xml_str = String((char*) stateInfo.getData(), stateInfo.getSize());
-		ValueTree tree = ValueTree::fromXml(*parseXML(xml_str));
-
-		_valueTreeDebugger.setSource(tree);
-		_valueTreeDebugger.setVisible(true);
-	}
-}
-
-void VirtualResonatorsProcessorEditor::DebugPanel::resized()
-{
-	FlexBox debug_sidebar;
-	auto debug_width = 50;
-
-	debug_sidebar.flexWrap = FlexBox::Wrap::wrap;
-	debug_sidebar.flexDirection = FlexBox::Direction::column;
-
-	debug_sidebar.items.add(FlexItem(_buffer_view).withHeight(debug_width).withWidth(debug_width));
-	debug_sidebar.items.add(FlexItem(_component_view).withHeight(debug_width).withWidth(debug_width));
-	debug_sidebar.items.add(FlexItem(_valueTree_view).withHeight(debug_width).withWidth(debug_width));
-	debug_sidebar.performLayout(getLocalBounds());
-}
-#endif

@@ -99,17 +99,7 @@ public:
     //==============================================================================
     void pluckResonator(int index);
 
-#if(_DEBUG)
-    void toggleBufferDebugger();
-#endif
-    
 private:
-    //==============================================================================
-#if(_DEBUG)
-    jcf::BufferDebugger* bufferDebugger;
-    bool bufferDebuggerOn = false;
-#endif
-
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VirtualResonatorsAudioProcessor)
 };

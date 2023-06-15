@@ -4,7 +4,8 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 ## Ignore everything but the source code
-Builds/
+Build/
+Build/*
 JuceLibraryCode/
 Test/modules/
 Test/VirtualResonatorsTest/

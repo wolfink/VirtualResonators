@@ -235,9 +235,6 @@ void VirtualResonatorsAudioProcessor::processBlock (juce::AudioBuffer<float>& bu
 
         float  wet                 = PARAM_VAL(WET_ID) / 100.0;
         float* output_channel_data = new float[buffer.getNumSamples()]{ 0 };
-#if(_DEBUG)
-		bufferDebugger->capture("Pre FX", channel_data, num_samples, -1.0, 1.0);
-#endif
         for (int index = 0; index < NUM_RESONATORS; index++) {
 			AudioBuffer<float> buffer_copy;
             buffer_copy.makeCopyOf(buffer);
@@ -247,9 +244,6 @@ void VirtualResonatorsAudioProcessor::processBlock (juce::AudioBuffer<float>& bu
 
             for (int i = 0; i < num_samples; i++)
                 output_channel_data[i] += channel_data_copy[i] / NUM_RESONATORS;
-#if(_DEBUG)
-			bufferDebugger->capture("Post FX #" + std::to_string(index), output_channel_data, num_samples, -1.0, 1.0);
-#endif
         }
 
         // Copy proccessed data into buffer through a DC blocking filter to prevent value drift
@@ -257,9 +251,6 @@ void VirtualResonatorsAudioProcessor::processBlock (juce::AudioBuffer<float>& bu
             float y = _dc_blockers[channel].process_sample(output_channel_data[sample]);
             channel_data[sample] = channel_data[sample] * (1 - wet)  + y * wet; // Wet signal + Dry signal
         }
-#if(_DEBUG)
-        bufferDebugger->capture("channelData", channel_data, num_samples, -1.0, 1.0);
-#endif
     }
 
     for (int channel = 0; channel < num_output_channels; channel++) {
@@ -334,12 +325,3 @@ void VirtualResonatorsAudioProcessor::pluckResonator(int index)
 {
 	_resonators[index].pluck();
 }
-
-#if(_DEBUG)
-void VirtualResonatorsAudioProcessor::toggleBufferDebugger()
-{
-    if (!bufferDebuggerOn) bufferDebugger = new jcf::BufferDebugger();
-    else delete bufferDebugger;
-    bufferDebuggerOn = !bufferDebuggerOn;
-}
-#endif
