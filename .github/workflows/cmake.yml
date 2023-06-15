@@ -16,7 +16,7 @@ jobs:
       - name: Get Linux dependencies
         run: |
           sudo apt-get update
-          sudo apt install g++ libasoudn2-dev libjack-jackd2-dev ladspa-sdk libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev
+          sudo apt install g++ libasound2-dev libjack-jackd2-dev ladspa-sdk libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev
 
       - name: Get CMake
         uses: lukka/get-cmake@latest
