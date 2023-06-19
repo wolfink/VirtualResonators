@@ -7,6 +7,8 @@ set(VIRTUALRESONATORS_VERSION "0.3.0")
 set(VIRTUALRESONATORS_COMPANY_NAME "wolfink")
 set(VIRTUALRESONATORS_COMPANY_WEBSITE "github.com/wolfink/VirtualResonators")
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 
 #include submodule libraries
@@ -23,7 +25,6 @@ juce_add_plugin(VirtualResonators
   FORMATS         VST3
   VST3_CATEGORIES Modulation,Reverb)
 
-juce_generate_juce_header(VirtualResonators)
 target_sources(VirtualResonators PRIVATE ${VirtualResonatorSources})
 
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR} PREFIX "Source Files" FILES ${VirutalResonatorSources})
@@ -53,3 +54,9 @@ list(APPEND libs)
 
 target_compile_definitions(VirtualResonators PUBLIC ${PLUGIN_COMPILE_DEFINITIONS})
 target_link_libraries(VirtualResonators PRIVATE ${libs} juce::juce_recommended_config_flags)
+
+execute_process(
+  COMMAND ${CMAKE_COMMAND} -E create_symlink
+    ${CMAKE_BINARY_DIR}/compile_commands.json
+    ${CMAKE_SOURCE_DIR}/compile_commands.json
+)

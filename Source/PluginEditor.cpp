@@ -117,7 +117,7 @@ void VirtualResonatorsProcessorEditor::resized()
 
 VirtualResonatorsProcessorEditor::ResonatorControl::ResonatorControl()
 {
-	juce::Path path;
+	Path path;
 	path.addEllipse(50, 200, 50, 50);
 
 	configComboBox(_noteval_cmb, notevals);

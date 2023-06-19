@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <JuceHeader.h>
+#include <juce_audio_utils/juce_audio_utils.h>
 #include "StringModel.h"
 #include "VirtualResonators.h"
 

@@ -12,6 +12,7 @@ Test/VirtualResonatorsTest/
 Logs/
 .vs/
 *.filtergraph
-/roadmap.txt
+*.json
 *.vst3
+.cache
 .DS_Store

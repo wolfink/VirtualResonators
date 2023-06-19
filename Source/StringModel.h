@@ -10,7 +10,8 @@
 
 #pragma once
 
-#include <JuceHeader.h>
+#include <vector>
+#include <juce_dsp/juce_dsp.h>
 #include "VirtualResonators.h"
 
 #define MIN_FREQ 10.0

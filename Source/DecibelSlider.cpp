@@ -9,11 +9,12 @@
 */
 
 #include "DecibelSlider.h"
+#include <juce_audio_basics/juce_audio_basics.h>
 
 
 juce::String DecibelSlider::getTextFromValue(double value)
 {
-	return juce::Decibels::toString(value);
+	return Decibels::toString(value);
 }
 
 double DecibelSlider::getValueFromText(const juce::String& text)

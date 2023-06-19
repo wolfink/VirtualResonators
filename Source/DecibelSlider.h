@@ -10,11 +10,13 @@
 
 #pragma once
 
-#include<JuceHeader.h>
+#include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_core/juce_core.h>
+#include "VirtualResonators.h"
 
-class DecibelSlider : public juce::Slider
+class DecibelSlider : public Slider
 {
 public:
-    juce::String getTextFromValue(double value) override;
-    double getValueFromText(const juce::String& text) override;
+    String getTextFromValue(double value) override;
+    double getValueFromText(const String& text) override;
 };

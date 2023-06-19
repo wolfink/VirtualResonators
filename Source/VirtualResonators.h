@@ -13,6 +13,8 @@
 template<typename T>
 using uptr = std::unique_ptr<T>;
 
+using namespace juce;
+
 #define LOOP(num) for(int _ = 0; _ < num; _++)
 
 #ifdef _WIN32
