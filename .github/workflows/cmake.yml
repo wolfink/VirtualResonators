@@ -10,10 +10,14 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Get Linux dependencies
+      - if: matrix.os == 'ubuntu-latest'
+        name: Install Linux dependencies
         run: |
           sudo apt-get update
           sudo apt install g++ libasound2-dev libjack-jackd2-dev ladspa-sdk libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev
