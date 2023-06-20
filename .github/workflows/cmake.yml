@@ -2,12 +2,14 @@ name: CMake
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ 'master' ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ 'master' ]
 
 env:
   BUILD_TYPE: Release
+  ARTIFACTS_PATH_UNIX: '/Build/VirtualResonators_artefacts/VST3/'
+  ARTIFACTS_PATH_WIN: '\Build\VirtualResonators_artefacts\Release\VST3\'
 
 jobs:
   build:
@@ -39,3 +41,40 @@ jobs:
 
       - name: Build Project
         run: cmake --build ${{github.workspace}}/Build --config ${{env.BUILD_TYPE}}
+
+      - if: matrix.os == 'windows-latest'
+        name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}
+          path: '${{ github.workspace }}${{ env.ARTIFACTS_PATH_WIN }}'
+
+      - if: matrix.os != 'windows-latest'
+        name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}
+          path: '${{ github.workspace }}${{ env.ARTIFACTS_PATH_UNIX }}'
+          retention-days: 1
+
+  combine_artifacts:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: downloaded
+      
+      - name: Merge artifacts
+        run: |
+          mkdir Release
+          rsync -av downloaded/*/*/ 'Release/Virtual Resonators.vst3/' 
+      
+      - name: Upload merged artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: 'Release/'
+
