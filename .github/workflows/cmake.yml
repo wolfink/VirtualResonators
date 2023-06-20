@@ -76,5 +76,6 @@ jobs:
       - name: Upload merged artifacts
         uses: actions/upload-artifact@v3
         with:
+          name: 'virtual-resonators'
           path: 'Release/'
 
