@@ -3,13 +3,14 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-## Ignore everything but the source code
 Build/
 Build/*
+Ignore/
+Ignore/*
 JuceLibraryCode/
+Logs/
 Test/modules/
 Test/VirtualResonatorsTest/
-Logs/
 .vs/
 *.filtergraph
 *.json
