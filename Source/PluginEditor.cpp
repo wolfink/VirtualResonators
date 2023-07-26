@@ -19,6 +19,12 @@ VirtualResonatorsProcessorEditor::VirtualResonatorsProcessorEditor(VirtualResona
     _preset_control(*this),
     _audioProcessor(p)
 {
+#if(_DEBUG)
+  configTextButton(_debug_btn, "Debug");
+  _debug_btn.onClick = [this] {
+      DebugPanel::getInstance()->open();
+  };
+#endif
     // Set parameters for volume and mix sliders
 	configVertSlider(_out_sld, -100.0,  12.0, 0.1);
 	configVertSlider(_in_sld , -100.0,  12.0, 0.1);
@@ -88,7 +94,8 @@ void VirtualResonatorsProcessorEditor::resized()
 	auto section_pad   = 10;
 	auto combo_height  = 20;
 
-	area.removeFromTop(header_height);
+	auto header_area = area.removeFromTop(header_height);
+  _debug_btn.setBounds(area.removeFromLeft(section_width));
 
 	//_mono_stereo_cmb.setBounds(getWidth() - section_width, getHeight() - 60, section_width, 40);
 

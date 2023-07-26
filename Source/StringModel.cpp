@@ -78,8 +78,8 @@ void StringModel::pluck()
 	LOOP(num_samples) {
         auto sample = random.nextFloat() * 2.0 - 1.0;
 		for (int channel = 0; channel < _num_channels; channel++) {
-			_delay_line.pushSample(channel, sample);
-			_delay_line.popSample(channel);
+            _delay_line.pushSample(channel, sample);
+            _delay_line.popSample(channel);
 		}
 	}
 }
@@ -94,4 +94,9 @@ void StringModel::process(float* samples, int channel, size_t numberOfSamples)
         _delay_line.pushSample(channel, samples[sample]);
         samples[sample] *= _volume * GAMMA;
     }
+#if(_DEBUG)
+    DebugComponent::getInstance()->setNumberBox("first sample", samples[0]);
+    DebugComponent::getInstance()->setNumberBox("second sample", samples[1]);
+    DebugComponent::getInstance()->audioVisualiserComponent.pushBuffer(&samples, 1, numberOfSamples);
+#endif
 }

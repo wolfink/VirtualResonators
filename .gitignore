@@ -9,6 +9,10 @@ Ignore/
 Ignore/*
 JuceLibraryCode/
 Logs/
+
+# Ignore all dotfiles in Source folder
+Source/.*
+
 Test/modules/
 Test/VirtualResonatorsTest/
 .vs/

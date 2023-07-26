@@ -14,6 +14,10 @@
 #include <juce_dsp/juce_dsp.h>
 #include "VirtualResonators.h"
 
+#if(_DEBUG)
+    #include "Debug/DebugPanel.h"
+#endif
+
 #define MIN_FREQ 10.0
 #define GAMMA    0.2
 

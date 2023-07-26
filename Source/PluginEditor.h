@@ -10,6 +10,9 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_utils/juce_audio_utils.h>
+#if(_DEBUG)
+#include "Debug/DebugPanel.h"
+#endif
 #include "PluginProcessor.h"
 #include "DecibelSlider.h"
 #include "VirtualResonators.h"
@@ -117,6 +120,10 @@ class VirtualResonatorsProcessorEditor : public VirtualResonatorsComponent<Audio
         void save_preset();
         StringArray get_preset_list();
     } _preset_control;
+
+#if(_DEBUG)
+    TextButton _debug_btn;
+#endif
 
     // I/O components
     DecibelSlider _in_sld, _out_sld;

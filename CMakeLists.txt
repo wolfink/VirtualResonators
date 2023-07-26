@@ -15,6 +15,8 @@ set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 add_subdirectory(Modules)
 
 file(GLOB VirtualResonatorSources
+  ${SRC_DIR}/Debug/*.h
+  ${SRC_DIR}/Debug/*.cpp
   ${SRC_DIR}/*.cpp
   ${SRC_DIR}/*.h
 )
