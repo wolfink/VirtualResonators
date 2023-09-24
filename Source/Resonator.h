@@ -13,12 +13,12 @@
 #include <vector>
 #include <juce_dsp/juce_dsp.h>
 #include "VirtualResonators.h"
+#include "ResonatorModels.h"
 
 #if(_DEBUG)
     #include "Debug/DebugPanel.h"
 #endif
 
-#define MIN_FREQ 10.0
 #define GAMMA    0.2
 
 //==============================================================================
@@ -27,30 +27,35 @@
     y[n] = x[n] + feedback * (x[n-L] + x[n-L-1]) / 2
     with L = sample rate / frequency (delay in samples)
 */
-class StringModel
+enum ResonatorModel
 {
-    dsp::DelayLine<float, dsp::DelayLineInterpolationTypes::Thiran> _delay_line;
+    KarplusStrong,
+    Waveguides
+};
+
+class Resonator
+{
     double _sample_rate;
     int    _num_channels;
-    double _decay;
-    double _damping;
     double _volume;
-    std::vector<float> _averaging_sample;
-public:
-    StringModel(double sample_rate);
-    StringModel(const StringModel& string_model);
-    ~StringModel();
+    ResonatorModel _model;
 
-    void setFrequency(double frequency);
-    void setDecay(double decay);
-    void setDamping(double damping);
-    void setVolume(double volume);
+    KarplusStrongModel _ks;
+    WaveguidesModel _wg;
+
+public:
+    Resonator(double sample_rate);
+    Resonator(const Resonator& string_model);
+    ~Resonator();
+
+    void clear();
+    void pluck();
     void prepare(const juce::dsp::ProcessSpec& process_spec);
     void process(float* samples, int channel, size_t number_of_samples);
-    void pluck();
-    void clear()
-    {
-      _delay_line.reset();
-    }
-    JUCE_LEAK_DETECTOR (StringModel)
+    void setModel(ResonatorModel);
+    void setParameters(const KarplusStrongParameters&);
+    void setParameters(const WaveguidesParameters&);
+    void setVolume(double volume);
+private:
+    JUCE_LEAK_DETECTOR (Resonator)
 };

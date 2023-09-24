@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "Resonator.h"
 
 //==============================================================================
 AudioProcessorValueTreeState::ParameterLayout createParamLayout() {
@@ -73,7 +74,7 @@ VirtualResonatorsAudioProcessor::VirtualResonatorsAudioProcessor() :
 #endif
     ),
 #endif
-    _resonators(std::vector<StringModel>(NUM_RESONATORS, StringModel(44100))),
+    _resonators(std::vector<Resonator>(NUM_RESONATORS, Resonator(44100))),
     _parameters(*this, nullptr, "PARAMS", createParamLayout()),
     _mono(false)
 {
@@ -149,8 +150,9 @@ void VirtualResonatorsAudioProcessor::changeProgramName (int index, const juce::
 void VirtualResonatorsAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     for (int index = 0; index < NUM_RESONATORS; index++) {
-        _resonators[index].setFrequency(440.0);
-        _resonators[index].prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32)samplesPerBlock, (juce::uint32)getNumOutputChannels() }));
+        _resonators[index].setModel(ResonatorModel::KarplusStrong);
+        _resonators[index].setParameters(KarplusStrongParameters {0.0, 0.0, 440.0});
+        _resonators[index].prepare(juce::dsp::ProcessSpec({ sampleRate, (juce::uint32)samplesPerBlock, (juce::uint32)getTotalNumOutputChannels() }));
     }
     for (int channel = 0; channel < getTotalNumInputChannels(); channel++) {
         _dc_blockers.push_back(DCBlocker());
@@ -217,8 +219,11 @@ void VirtualResonatorsAudioProcessor::processBlock (juce::AudioBuffer<float>& bu
 
 		buffer.applyGain(input_volume);
 
-        // Update synthesizer parameters, and add noise, before processing audio
+
+        float  wet                 = PARAM_VAL(WET_ID) / 100.0;
+        float* output_channel_data = new float[buffer.getNumSamples()]{ 0 };
         for (int index = 0; index < NUM_RESONATORS; index++) {
+			AudioBuffer<float> buffer_copy;
             float octave    = PARAM_VAL(OCTAVE_ID(index));
             float note      = PARAM_VAL(NOTEVAL_ID(index));
             float detune    = PARAM_VAL(DETUNE_ID(index));
@@ -226,20 +231,20 @@ void VirtualResonatorsAudioProcessor::processBlock (juce::AudioBuffer<float>& bu
             float damping   = 1 - std::pow(10, PARAM_VAL(DAMPING_ID(index)) / 25.0 - 5);
             float volume    = PARAM_VAL(TOGGLE_ID(index)) * PARAM_VAL(VOLUME_ID(index)) / 10;
 			float frequency = 440.0 * std::pow(2, (octave - 4.0) +  (note - 9.0) / 12.0 + detune / 1200.0);
-            _resonators[index].setFrequency(frequency);
-            _resonators[index].setDecay(decay);
-            _resonators[index].setDamping(damping);
-            _resonators[index].setVolume(volume);
-        }
+            KarplusStrongParameters ks;
+            ks.damping = damping;
+            ks.decay = decay;
+            ks.frequency = frequency;
 
-
-        float  wet                 = PARAM_VAL(WET_ID) / 100.0;
-        float* output_channel_data = new float[buffer.getNumSamples()]{ 0 };
-        for (int index = 0; index < NUM_RESONATORS; index++) {
-			AudioBuffer<float> buffer_copy;
             buffer_copy.makeCopyOf(buffer);
             auto channel_data_copy = buffer_copy.getWritePointer(channel);
 
+            //_resonators[index].setFrequency(frequency);
+            //_resonators[index].setDecay(decay);
+            //_resonators[index].setDamping(damping);
+            _resonators[index].setModel(ResonatorModel::KarplusStrong);
+            _resonators[index].setParameters(ks);
+            _resonators[index].setVolume(volume);
 			_resonators[index].process(channel_data_copy, channel, num_samples);
 
             for (int i = 0; i < num_samples; i++)

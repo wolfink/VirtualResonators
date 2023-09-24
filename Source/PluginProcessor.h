@@ -9,7 +9,7 @@
 #pragma once
 
 #include <juce_audio_utils/juce_audio_utils.h>
-#include "StringModel.h"
+#include "Resonator.h"
 #include "VirtualResonators.h"
 
 #define NUM_RESONATORS 12
@@ -51,7 +51,7 @@ class DCBlocker;
 class VirtualResonatorsAudioProcessor : public AudioProcessor
 {
     //==============================================================================
-    std::vector<StringModel> _resonators;
+    std::vector<Resonator> _resonators;
     std::vector<DCBlocker>   _dc_blockers;
 
 public:
