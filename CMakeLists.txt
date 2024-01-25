@@ -8,6 +8,7 @@ set(VIRTUALRESONATORS_COMPANY_NAME "wolfink")
 set(VIRTUALRESONATORS_COMPANY_WEBSITE "github.com/wolfink/VirtualResonators")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Bin")
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 
@@ -17,15 +18,18 @@ add_subdirectory(Modules)
 file(GLOB VirtualResonatorSources
   ${SRC_DIR}/Debug/*.h
   ${SRC_DIR}/Debug/*.cpp
+  ${SRC_DIR}/GUI/*.cpp
   ${SRC_DIR}/*.cpp
   ${SRC_DIR}/*.h
 )
 
 juce_add_plugin(VirtualResonators
-  PRODUCT_NAME    "Virtual Resonators"
-  VERSION         ${VIRTUALRESONATORS_VERSION}
-  FORMATS         VST3
-  VST3_CATEGORIES Modulation,Reverb)
+  PRODUCT_NAME            "Virtual Resonators"
+  VERSION                 ${VIRTUALRESONATORS_VERSION}
+  FORMATS                 VST3
+  VST3_CATEGORIES         Modulation,Reverb
+  COPY_PLUGIN_AFTER_BUILD true
+  VST3_COPY_DIR           "${CMAKE_SOURCE_DIR}/Bin/VST3")
 
 target_sources(VirtualResonators PRIVATE ${VirtualResonatorSources})
 
