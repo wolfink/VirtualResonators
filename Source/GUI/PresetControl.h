@@ -27,14 +27,19 @@ public:
         Path preset_btn_shape;
         preset_btn_shape.addTriangle(0, 10, 20, 20, 20, 0);
 
-        configShapeButton(_left_btn , "LeftPre" , preset_btn_shape, Colour(128, 128, 128));
+        auto preset_btn_color = _lookAndFeel
+            .getCurrentColourScheme()
+            .getUIColour(VRLookAndFeel::ColourScheme::UIColour::outline);
+
+        configShapeButton(_left_btn , "LeftPre" , preset_btn_shape, preset_btn_color);
         _left_btn.onClick = [this] { prev_preset(); };
 
         preset_btn_shape.applyTransform(AffineTransform::rotation(MathConstants<float>::pi));
-        configShapeButton(_right_btn, "RightPre", preset_btn_shape, Colour(128, 128, 128));
+        configShapeButton(_right_btn, "RightPre", preset_btn_shape, preset_btn_color);
         _right_btn.onClick = [this] { next_preset(); };
 
         configComboBox(_preset_name, get_preset_list());
+        _preset_name.setText("Init");
         _preset_name.setEditableText(true);
         _preset_name.onChange = [this] { load_preset(); };
 
@@ -46,19 +51,20 @@ public:
     {
         FlexBox preset_bar;
         auto preset_height = 30;
+        auto btn_size = preset_height * 0.8;
 
         preset_bar.alignItems = FlexBox::AlignItems::center;
         preset_bar.items.add(FlexItem(_left_btn)
-            .withWidth(preset_height)
-            .withHeight(preset_height)
+            .withWidth(btn_size)
+            .withHeight(btn_size)
             .withMargin(FlexItem::Margin(0, 5, 0, 0)));
         preset_bar.items.add(FlexItem(_preset_name)
             .withFlex(1)
             .withHeight(preset_height)
             .withMargin(FlexItem::Margin(0, 5, 0, 0)));
         preset_bar.items.add(FlexItem(_right_btn)
-            .withWidth(preset_height)
-            .withHeight(preset_height));
+            .withWidth(btn_size)
+            .withHeight(btn_size));
         preset_bar.items.add(FlexItem(_save_btn)
             .withFlex(0.25)
             .withHeight(preset_height)

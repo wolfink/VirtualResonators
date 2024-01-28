@@ -4,6 +4,7 @@
 #include <juce_dsp/juce_dsp.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "../PluginProcessor.h"
+#include "VRLookAndFeel.h"
 
 struct VRShapeButton : public ShapeButton {
     VRShapeButton() : ShapeButton("Noname", Colours::white, Colours::white, Colours::black) { }
@@ -12,6 +13,10 @@ struct VRShapeButton : public ShapeButton {
 template<class ComponentClass = Component>
 struct VirtualResonatorsComponent : public ComponentClass
 {
+protected:
+    VRLookAndFeel _lookAndFeel;
+
+public:
     VirtualResonatorsComponent() : ComponentClass() {}
 
     template<typename CC = ComponentClass,
@@ -66,4 +71,5 @@ private:
 		slider.setTextBoxStyle          (Slider::NoTextBox, false, 90, 0);
 		this->addAndMakeVisible(slider);
     }
+
 };
