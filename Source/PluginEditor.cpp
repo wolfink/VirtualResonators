@@ -10,7 +10,10 @@
 #include "PluginEditor.h"
 
 #define SET_AND_ATTACH_LABEL(label, component, text, left) {\
+    Font font(18.0, Font::FontStyleFlags::bold);\
 	label.setText           (text, NotificationType::dontSendNotification);\
+    label.setJustificationType(Justification::horizontallyCentred);\
+    label.setFont(font);\
 	label.attachToComponent (component, left);\
 }
 
@@ -100,7 +103,6 @@ void VirtualResonatorsProcessorEditor::paint (juce::Graphics& g)
 
     g.setColour(Colours::linen);
     Font font(25.0, Font::FontStyleFlags::bold);
-    //std::cout << Font::getDefaultSerifFontName() << std::endl;
     g.setFont (font);
     g.drawFittedText("Virtual Resonators", 0, 0, getWidth(), 40, juce::Justification::centred, 1);
 }
@@ -113,6 +115,7 @@ void VirtualResonatorsProcessorEditor::resized()
 	auto section_width = 80;
 	auto section_pad   = 10;
 	auto combo_height  = 20;
+    auto label_margin  = 30;
 
 	auto header_area = area.removeFromTop(header_height);
 
@@ -134,9 +137,15 @@ void VirtualResonatorsProcessorEditor::resized()
 
 	_presetControl.setBounds(footer_area);
 
-	_in_sld.setBounds(area.removeFromLeft(section_width));
-	_out_sld.setBounds(area.removeFromRight(section_width));
-	_wet_sld.setBounds(area.removeFromRight(section_width));
+	_in_sld.setBounds(area
+                    .removeFromLeft(section_width)
+                    .removeFromBottom(area.getHeight() - label_margin));
+	_out_sld.setBounds(area
+                    .removeFromRight(section_width)
+                    .removeFromBottom(area.getHeight() - label_margin));
+	_wet_sld.setBounds(area
+                    .removeFromRight(section_width)
+                    .removeFromBottom(area.getHeight() - label_margin));
 
 	for (int i = 0; i < NUM_RESONATORS; i++) {
 		if (i == 0) _resonatorControls[i].setBounds(area.removeFromLeft(2 * section_width));

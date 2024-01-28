@@ -54,8 +54,10 @@ public:
         // _toggle_btn.setClickingTogglesState(true);
         // _toggle_btn.setToggleState         (true, NotificationType::dontSendNotification);
 
+        Font font(18.0, Font::FontStyleFlags::bold);
         _lbl.setText             (std::to_string(index + 1), NotificationType::dontSendNotification);
         _lbl.setJustificationType(Justification::horizontallyCentred);
+        _lbl.setFont             (font);
         _lbl.attachToComponent   (&_noteval_cmb, false);
 
         _pluckButton.onClick = [this, index] { _audioProcessor.pluckResonator(index); };
