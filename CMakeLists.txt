@@ -3,7 +3,7 @@ project(VirtualResonators)
 
 #find_package(JUCE CONFIG REQUIRED)
 
-set(VIRTUAL_RESONATORS_VERSION "0.4.0")
+set(VIRTUAL_RESONATORS_VERSION "0.5.0")
 set(VIRTUAL_RESONATORS_COMPANY_NAME "wolfink")
 set(VIRTUAL_RESONATORS_COMPANY_WEBSITE "github.com/wolfink/VirtualResonators")
 
