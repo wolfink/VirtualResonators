@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <sstream>
 
 #define SET_AND_ATTACH_LABEL(label, component, text, left) {\
     Font font(18.0, Font::FontStyleFlags::bold);\
@@ -94,17 +95,54 @@ VirtualResonatorsProcessorEditor::~VirtualResonatorsProcessorEditor()
 //==============================================================================
 void VirtualResonatorsProcessorEditor::paint (juce::Graphics& g)
 {
-    auto windowBackground = _look_and_feel
+    const auto windowBackground = _look_and_feel
         .getCurrentColourScheme()
         .getUIColour(VRLookAndFeel::ColourScheme::UIColour::windowBackground);
+    const auto title_color = _look_and_feel
+        .getCurrentColourScheme()
+        .getUIColour(VRLookAndFeel::ColourScheme::UIColour::defaultFill);
+    const auto center_x = getWidth() * 0.5;
+    const auto text_width = 250.0;
+    const auto title_size = 25.0;
+    const auto info_size  = 18.0;
+    const auto text_x   = 20.0;
+    const auto text_y   = 10.0;
+    const Font title_font(title_size, Font::FontStyleFlags::bold);
+    const Font info_font(info_size, Font::FontStyleFlags::bold);
 
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (windowBackground);
 
     g.setColour(Colours::linen);
-    Font font(25.0, Font::FontStyleFlags::bold);
-    g.setFont (font);
-    g.drawFittedText("Virtual Resonators", 0, 0, getWidth(), 40, juce::Justification::centred, 1);
+    g.fillRoundedRectangle(text_x, text_y, text_width, title_size + text_y, 15.0);
+
+    g.setColour(title_color);
+    g.setFont (title_font);
+    g.drawFittedText("Virtual Resonators", 
+                     text_x, text_y + 5.0,
+                     text_width, title_size,
+                     juce::Justification::centred, 1);
+
+    g.setFont(info_font);
+    g.setColour (Colours::linen);
+    g.drawFittedText("by",
+                     text_x + text_width + 15.0, text_y + 12.0,
+                     25.0, info_size,
+                     Justification::centred, 1);
+
+    g.setColour (Colours::peru);
+    g.drawFittedText("wolfink",
+                     text_x + text_width + 40.0, text_y + 12.0,
+                     70.0, info_size,
+                     Justification::centred, 1);
+
+    g.setColour (Colours::linen);
+    std::stringstream version_string;
+    version_string << "v" << PLUGIN_VERSION;
+    g.drawFittedText(version_string.str(),
+                     text_x + text_width + 110.0, text_y + 12.0,
+                     70.0, info_size,
+                     Justification::centred, 1);
 }
 
 void VirtualResonatorsProcessorEditor::resized()
@@ -120,7 +158,7 @@ void VirtualResonatorsProcessorEditor::resized()
 	auto header_area = area.removeFromTop(header_height);
 
 #if(_DEBUG)
-    _debug_btn.setBounds(header_area.removeFromLeft(section_width));
+    _debug_btn.setBounds(header_area.removeFromRight(section_width));
 #endif
 
 	//_mono_stereo_cmb.setBounds(getWidth() - section_width, getHeight() - 60, section_width, 40);

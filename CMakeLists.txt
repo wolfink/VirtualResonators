@@ -3,9 +3,11 @@ project(VirtualResonators)
 
 #find_package(JUCE CONFIG REQUIRED)
 
-set(VIRTUALRESONATORS_VERSION "0.4.0")
-set(VIRTUALRESONATORS_COMPANY_NAME "wolfink")
-set(VIRTUALRESONATORS_COMPANY_WEBSITE "github.com/wolfink/VirtualResonators")
+set(VIRTUAL_RESONATORS_VERSION "0.4.0")
+set(VIRTUAL_RESONATORS_COMPANY_NAME "wolfink")
+set(VIRTUAL_RESONATORS_COMPANY_WEBSITE "github.com/wolfink/VirtualResonators")
+
+add_compile_definitions(-DPLUGIN_VERSION="${VIRTUAL_RESONATORS_VERSION}")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Bin")
@@ -25,7 +27,7 @@ file(GLOB VirtualResonatorSources
 
 juce_add_plugin(VirtualResonators
   PRODUCT_NAME            "Virtual Resonators"
-  VERSION                 ${VIRTUALRESONATORS_VERSION}
+  VERSION                 ${VIRTUAL_RESONATORS_VERSION}
   FORMATS                 VST3
   VST3_CATEGORIES         Modulation,Reverb
   COPY_PLUGIN_AFTER_BUILD true
@@ -33,7 +35,7 @@ juce_add_plugin(VirtualResonators
 
 target_sources(VirtualResonators PRIVATE ${VirtualResonatorSources})
 
-source_group(TREE ${CMAKE_CURRENT_LIST_DIR} PREFIX "Source Files" FILES ${VirutalResonatorSources})
+source_group(TREE ${CMAKE_CURRENT_LIST_DIR} PREFIX "Source Files" FILES ${VirtualResonatorSources})
 
 set(libs
   juce::juce_audio_basics
