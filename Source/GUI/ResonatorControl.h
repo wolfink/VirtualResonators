@@ -73,8 +73,8 @@ public:
             _audioProcessor._parameters,  DAMPING_ID(index), _damping_sld);
         _volume_attachments = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
             _audioProcessor._parameters,   VOLUME_ID(index), _volume_sld);
-        // _toggle_attachments = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(
-        //     _audioProcessor._parameters,   TOGGLE_ID(index), _toggle_btn);
+        _toggle_attachments = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(
+            _audioProcessor._parameters,   TOGGLE_ID(index), _toggle_btn);
     }
     // void initialize(VirtualResonatorsProcessorEditor* e, int index);
     void resized() override

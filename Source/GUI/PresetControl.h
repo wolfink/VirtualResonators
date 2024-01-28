@@ -42,6 +42,7 @@ public:
         _preset_name.setText("Init");
         _preset_name.setEditableText(true);
         _preset_name.onChange = [this] { load_preset(); };
+        save_preset();
 
         configTextButton(_save_btn, "Save");
         _save_btn.onClick = [this] { save_preset(); };
