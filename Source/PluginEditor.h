@@ -22,24 +22,6 @@
 
 class VirtualResonatorsProcessorEditor : public VirtualResonatorsComponent<AudioProcessorEditor>
 {
-    // class ResonatorControl : public VirtualResonatorsComponent<>
-    // {
-    //     VirtualResonatorsProcessorEditor* _parent;
-    // public:
-    //     Label       _lbl;
-    //     ComboBox    _noteval_cmb, _octave_cmb;
-    //     Slider      _detune_sld, _decay_sld, _volume_sld, _damping_sld;
-    //     VRShapeButton _pluck_btn, _toggle_btn;
-    //     uptr<AudioProcessorValueTreeState::ComboBoxAttachment> _noteval_attachments, _octave_attachments;
-    //     uptr<AudioProcessorValueTreeState::SliderAttachment>
-    //       _detune_attachments, _decay_attachments, _damping_attachments, _volume_attachments;
-    //     uptr<AudioProcessorValueTreeState::ButtonAttachment> _toggle_attachments;
-
-    //     ResonatorControl();
-    //     void initialize(VirtualResonatorsProcessorEditor* e, int index);
-    //     void resized() override;
-    // } _res_controls[NUM_RESONATORS];
-
     VRLookAndFeel    _look_and_feel;
     PresetControl    _presetControl;
     ResonatorControl _resonatorControls[NUM_RESONATORS];

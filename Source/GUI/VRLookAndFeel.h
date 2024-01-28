@@ -1,3 +1,5 @@
+#pragma once
+
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "../VirtualResonators.h"
 
@@ -11,9 +13,9 @@ public:
       Colour(0x2A, 0x60, 0x3F), // menuBackground
       Colours::linen,           // outline
       Colours::linen,           // defaultText
-      Colour(0x2A, 0x60, 0x3F), // defaultFill
+      Colour(0x33, 0x33, 0x33), // defaultFill
       Colours::linen,           // highlightedText
-      Colour(0x2A, 0x60, 0x3F), // highlightedFill
+      Colours::peru,            // highlightedFill
       Colours::linen            // menuText
     );
   

@@ -2,7 +2,10 @@
 
 #include "../PluginProcessor.h"
 #include "../VirtualResonators.h"
+#include "VRLookAndFeel.h"
 #include "VRComponent.h"
+#include "ResonatorToggle.h"
+#include "PluckButton.h"
 
 class ResonatorControl : public VirtualResonatorsComponent<>
 {
@@ -11,20 +14,24 @@ public:
     Label       _lbl;
     ComboBox    _noteval_cmb, _octave_cmb;
     Slider      _detune_sld, _decay_sld, _volume_sld, _damping_sld;
-    VRShapeButton _pluck_btn, _toggle_btn;
+    // VRShapeButton _pluck_btn;//, _toggle_btn;
+    PluckButton _pluckButton;
+    ResonatorToggle _toggle_btn;
     uptr<AudioProcessorValueTreeState::ComboBoxAttachment> _noteval_attachments, _octave_attachments;
     uptr<AudioProcessorValueTreeState::SliderAttachment>
         _detune_attachments, _decay_attachments, _damping_attachments, _volume_attachments;
     uptr<AudioProcessorValueTreeState::ButtonAttachment> _toggle_attachments;
 
     ResonatorControl(VirtualResonatorsAudioProcessor& a, int index) : 
-        _audioProcessor(a)
+        _audioProcessor(a),
+        _toggle_btn(index),
+        _pluckButton(index)
     {
         Path pluck_btn_path;
         pluck_btn_path.addEllipse(50, 200, 50, 50);
 
-        Path toggle_btn_path;
-        toggle_btn_path.addEllipse(0, 0, 20, 20);
+        // Path toggle_btn_path;
+        // toggle_btn_path.addEllipse(0, 0, 20, 20);
 
         configComboBox(_noteval_cmb, notevals);
         configComboBox(_octave_cmb, { "0", "1", "2", "3", "4", "5", "6", "7", "8" });
@@ -32,24 +39,26 @@ public:
         configRotarySlider(_decay_sld, 0.0, 100.0, 0.1);
         configRotarySlider(_damping_sld, 0.0, 100.0, 0.1);
         configRotarySlider(_volume_sld, 0.0, 10.0, 0.01);
-        configShapeButton(_pluck_btn , "Pluck" , pluck_btn_path, Colour(128, 128, 128));
-        configShapeButton(_toggle_btn, "On/Off", toggle_btn_path, Colour(30, 0, 0), false);
-        _toggle_btn.setOnColours(
-            Colour(128, 0, 0),
-            Colour(128, 0, 0),
-            Colour(128, 0, 0)
-        );
-        _toggle_btn.shouldUseOnColours     (true);
-        _toggle_btn.setShape               (pluck_btn_path, false, false, false);
-        _toggle_btn.setToggleable          (true);
-        _toggle_btn.setClickingTogglesState(true);
-        _toggle_btn.setToggleState         (true, NotificationType::dontSendNotification);
+        // configShapeButton(_pluck_btn , "Pluck" , pluck_btn_path, Colour(128, 128, 128));
+        addAndMakeVisible(&_pluckButton);
+        addAndMakeVisible(&_toggle_btn);
+        // configShapeButton(_toggle_btn, "On/Off", toggle_btn_path, Colour(30, 0, 0), false);
+        // _toggle_btn.setOnColours(
+        //     Colour(128, 0, 0),
+        //     Colour(128, 0, 0),
+        //     Colour(128, 0, 0)
+        // );
+        // _toggle_btn.shouldUseOnColours     (true);
+        // _toggle_btn.setShape               (pluck_btn_path, false, false, false);
+        // _toggle_btn.setToggleable          (true);
+        // _toggle_btn.setClickingTogglesState(true);
+        // _toggle_btn.setToggleState         (true, NotificationType::dontSendNotification);
 
         _lbl.setText             (std::to_string(index + 1), NotificationType::dontSendNotification);
         _lbl.setJustificationType(Justification::horizontallyCentred);
         _lbl.attachToComponent   (&_noteval_cmb, false);
 
-        _pluck_btn.onClick = [this, index] { _audioProcessor.pluckResonator(index); };
+        _pluckButton.onClick = [this, index] { _audioProcessor.pluckResonator(index); };
 
         // Attach GUI controls to parameters
         _noteval_attachments = std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(
@@ -64,8 +73,8 @@ public:
             _audioProcessor._parameters,  DAMPING_ID(index), _damping_sld);
         _volume_attachments = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(
             _audioProcessor._parameters,   VOLUME_ID(index), _volume_sld);
-        _toggle_attachments = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(
-            _audioProcessor._parameters,   TOGGLE_ID(index), _toggle_btn);
+        // _toggle_attachments = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(
+        //     _audioProcessor._parameters,   TOGGLE_ID(index), _toggle_btn);
     }
     // void initialize(VirtualResonatorsProcessorEditor* e, int index);
     void resized() override
@@ -105,7 +114,7 @@ public:
         resonator_flex.items.add(FlexItem(_volume_sld)
             .withWidth(diameter)
             .withHeight(diameter));
-        resonator_flex.items.add(FlexItem(_pluck_btn)
+        resonator_flex.items.add(FlexItem(_pluckButton)
             .withWidth(diameter)
             .withHeight(diameter));
         resonator_flex.items.add(FlexItem(_toggle_btn)

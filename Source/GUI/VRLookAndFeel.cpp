@@ -13,7 +13,7 @@ void VRLookAndFeel::drawRotarySlider(
                       float rotaryEndAngle,
                       Slider &s)
 {
-    auto radius = (float) juce::jmin (width / 2, height / 2) - 4.0f;
+    auto radius = (float) jmin (width / 2, height / 2) - 4.0f;
     auto centreX = (float) x + (float) width  * 0.5f;
     auto centreY = (float) y + (float) height * 0.5f;
     auto rx = centreX - radius;
